@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-9 col-lg-7">
+        <div class="card card-gym p-4 p-md-5 bg-white shadow-sm">
+            <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+                <div>
+                    <h4 class="fw-bold mb-1 text-dark">
+                        <i class="bi bi-person-badge-fill text-primary me-2"></i>{{ title }}
+                    </h4>
+                    <p class="text-muted small mb-0">Isi data calon member. Pendaftaran cepat kasir (< 2 menit).</p>
+                </div>
+                <a href="{% url 'member_list' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Kembali
+                </a>
+            </div>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="id_full_name" class="form-label fw-semibold small text-secondary">
+                        {{ form.full_name.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ form.full_name }}
+                    {% if form.full_name.errors %}
+                        <div class="text-danger small mt-1">{{ form.full_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label for="id_phone_wa" class="form-label fw-semibold small text-secondary">
+                            {{ form.phone_wa.label }}
+                        </label>
+                        {{ form.phone_wa }}
+                        <div class="form-text small text-muted">{{ form.phone_wa.help_text }}</div>
+                        {% if form.phone_wa.errors %}
+                            <div class="text-danger small mt-1">{{ form.phone_wa.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label for="id_member_code" class="form-label fw-semibold small text-secondary">
+                            {{ form.member_code.label }}
+                        </label>
+                        {{ form.member_code }}
+                        <div class="form-text small text-muted">{{ form.member_code.help_text }}</div>
+                        {% if form.member_code.errors %}
+                            <div class="text-danger small mt-1">{{ form.member_code.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_join_date" class="form-label fw-semibold small text-secondary">
+                        {{ form.join_date.label }}
+                    </label>
+                    {{ form.join_date }}
+                    {% if form.join_date.errors %}
+                        <div class="text-danger small mt-1">{{ form.join_date.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_notes" class="form-label fw-semibold small text-secondary">
+                        {{ form.notes.label }}
+                    </label>
+                    {{ form.notes }}
+                    {% if form.notes.errors %}
+                        <div class="text-danger small mt-1">{{ form.notes.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4 form-check p-3 bg-light rounded border">
+                    {{ form.is_active }}
+                    <label class="form-check-label ms-2 fw-semibold text-dark" for="id_is_active">
+                        {{ form.is_active.label }}
+                    </label>
+                    <div class="form-text small text-muted">
+                        Nonaktifkan bila member berhenti berlangganan atau diblokir.
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'member_list' %}" class="btn btn-light border px-4">Batal</a>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">
+                        <i class="bi bi-check-lg me-1"></i> Simpan Data Member
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -15,9 +15,9 @@ Aturan: satu fase selesai dan diuji, baru lanjut. Setiap fase punya "Selesai jik
 Project Django, konfigurasi `.env` (+ `.env.example`), Custom User model (`AbstractUser` dengan role `owner` & `staff`), zona waktu WITA (`Asia/Makassar`), SQLite + migrasi awal, login dua peran, kerangka feature flag (`FEATURE_CHECKIN`, `FEATURE_REPORTS`, `FEATURE_WA_REMINDER`) dan pengaturan per gym (D-014), layout dasar responsif dengan Bootstrap 5.
 **Selesai jika:** staf dan owner bisa login, halaman terproteksi menolak yang belum login, role permission berjalan, dan mengubah flag di konfigurasi menyembunyikan/menampilkan menu terkait. (LULUS 7/7 UNIT TEST)
 
-## Fase 2 — Member dan paket
+## Fase 2 — Member dan paket (SELESAI)
 CRUD member (tambah, ubah, cari nama/kode, sanitasi nomor WA otomatis D-018), CRUD paket (nama, durasi, harga, aktif/nonaktif).
-**Selesai jika:** bisa menambah 20 member contoh dan mencarinya berdasarkan nama atau kode secara instan.
+**Selesai jika:** bisa menambah 20 member contoh dan mencarinya berdasarkan nama atau kode secara instan. (LULUS 17/17 UNIT TEST)
 
 ## Fase 3 — Keanggotaan dan pembayaran
 Buat dan perpanjang membership, catat pembayaran (status terverifikasi otomatis oleh staf D-016), kalkulasi aturan masa aktif sesuai `DATA_MODEL.md` (menjaga akumulasi sisa hari aktif jika diperpanjang sebelum habis).

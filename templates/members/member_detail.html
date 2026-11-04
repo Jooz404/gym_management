@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Profil Member — {{ member.full_name }}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Kolom Kiri: Kartu Identitas Member -->
+    <div class="col-12 col-lg-5">
+        <!-- Kartu Member Visual -->
+        <div class="card card-gym bg-dark text-white p-4 shadow mb-3" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(255,255,255,0.1);">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <span class="badge bg-warning text-dark px-2 py-1 fw-bold">
+                    <i class="bi bi-lightning-charge-fill"></i> {{ gym_name }}
+                </span>
+                <span class="badge {% if member.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                    {% if member.is_active %}Member Aktif{% else %}Nonaktif{% endif %}
+                </span>
+            </div>
+            
+            <div class="text-center my-3">
+                <div class="display-6 fw-bold font-monospace tracking-wide text-warning">{{ member.member_code }}</div>
+                <div class="small text-white-50">KODE IDENTITAS MEMBER</div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top border-secondary border-opacity-50">
+                <h4 class="fw-bold mb-1">{{ member.full_name }}</h4>
+                <div class="small text-white-50">
+                    Bergabung: {{ member.join_date|date:"d F Y" }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail Data Kontak -->
+        <div class="card card-gym p-4 bg-white shadow-sm mb-3">
+            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-person-lines-fill me-2 text-primary"></i>Informasi Kontak</h5>
+            <ul class="list-group list-group-flush small">
+                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                    <span class="text-muted">Nomor WhatsApp:</span>
+                    {% if member.phone_wa %}
+                        <a href="{{ member.wa_url }}" target="_blank" class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-1">
+                            <i class="bi bi-whatsapp"></i>
+                            <span>{{ member.phone_wa }}</span>
+                        </a>
+                    {% else %}
+                        <span class="text-muted">Belum ada</span>
+                    {% endif %}
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                    <span class="text-muted">Tanggal Bergabung:</span>
+                    <span class="fw-semibold text-dark">{{ member.join_date|date:"d F Y" }}</span>
+                </li>
+                <li class="list-group-item px-0">
+                    <span class="text-muted d-block mb-1">Catatan Staf:</span>
+                    <span class="text-dark">{{ member.notes|default:"Tidak ada catatan tambahan." }}</span>
+                </li>
+            </ul>
+
+            <div class="d-flex gap-2 mt-3 pt-3 border-top">
+                <a href="{% url 'member_update' member.pk %}" class="btn btn-outline-secondary w-50">
+                    <i class="bi bi-pencil me-1"></i> Ubah Data
+                </a>
+                <a href="{% url 'member_list' %}" class="btn btn-light border w-50">
+                    <i class="bi bi-arrow-left me-1"></i> Kembali
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kolom Kanan: Status Membership & Riwayat Kehadiran (Fase 3 & 4) -->
+    <div class="col-12 col-lg-7">
+        <!-- Kotak Status Membership (Fase 3) -->
+        <div class="card card-gym p-4 bg-white shadow-sm mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-card-checklist me-2 text-primary"></i>Status Keanggotaan & Paket
+                </h5>
+                <span class="badge bg-secondary-subtle text-secondary">Fase 3</span>
+            </div>
+            <div class="p-4 bg-light rounded text-center text-muted">
+                <i class="bi bi-calendar-check fs-2 d-block mb-2 text-primary"></i>
+                <p class="mb-2">Periode keanggotaan dan pencatatan pembayaran akan aktif pada <strong>Fase 3</strong>.</p>
+                <button class="btn btn-primary btn-sm disabled" title="Akan aktif di Fase 3">
+                    <i class="bi bi-plus-circle me-1"></i> Buat / Perpanjang Membership
+                </button>
+            </div>
+        </div>
+
+        <!-- Kotak Riwayat Check-in Kehadiran (Fase 4) -->
+        <div class="card card-gym p-4 bg-white shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-clock-history me-2 text-info"></i>Riwayat Kehadiran (Check-in)
+                </h5>
+                <span class="badge bg-secondary-subtle text-secondary">Fase 4</span>
+            </div>
+            <div class="p-4 bg-light rounded text-center text-muted">
+                <i class="bi bi-qr-code-scan fs-2 d-block mb-2 text-info"></i>
+                <p class="mb-0">Pencatatan riwayat check-in member menggunakan kode <strong>{{ member.member_code }}</strong> akan aktif pada <strong>Fase 4</strong>.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

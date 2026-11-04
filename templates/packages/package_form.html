@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card card-gym p-4 p-md-5 bg-white shadow-sm">
+            <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+                <h4 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-tag-fill text-primary me-2"></i>{{ title }}
+                </h4>
+                <a href="{% url 'package_list' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Kembali
+                </a>
+            </div>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="id_name" class="form-label fw-semibold small text-secondary">
+                        {{ form.name.label }} <span class="text-danger">*</span>
+                    </label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label for="id_duration_days" class="form-label fw-semibold small text-secondary">
+                            {{ form.duration_days.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.duration_days }}
+                        {% if form.duration_days.errors %}
+                            <div class="text-danger small mt-1">{{ form.duration_days.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label for="id_price" class="form-label fw-semibold small text-secondary">
+                            {{ form.price.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.price }}
+                        {% if form.price.errors %}
+                            <div class="text-danger small mt-1">{{ form.price.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-4 form-check p-3 bg-light rounded border">
+                    {{ form.is_active }}
+                    <label class="form-check-label ms-2 fw-semibold text-dark" for="id_is_active">
+                        {{ form.is_active.label }}
+                    </label>
+                    <div class="form-text small text-muted">
+                        Jika dicentang, paket ini akan langsung muncul dalam daftar pilihan saat pendaftaran / perpanjangan member.
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'package_list' %}" class="btn btn-light border px-4">Batal</a>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">
+                        <i class="bi bi-check-lg me-1"></i> Simpan Paket
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

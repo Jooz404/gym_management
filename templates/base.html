@@ -47,24 +47,24 @@
             
             {% if user.is_authenticated %}
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
-                <span class="navbar-toggler-prev bi bi-list fs-2 text-white"></span>
+                <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarMain">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active font-bold{% endif %}" href="{% url 'dashboard' %}">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active fw-bold text-white{% endif %}" href="{% url 'dashboard' %}">
                             <i class="bi bi-speedometer2 me-1"></i> Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
-                        <span class="nav-link text-white-50 disabled">
-                            <i class="bi bi-people me-1"></i> Member (Fase 2)
-                        </span>
+                        <a class="nav-link {% if 'members' in request.path %}active fw-bold text-white{% endif %}" href="{% url 'member_list' %}">
+                            <i class="bi bi-people me-1"></i> Member
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <span class="nav-link text-white-50 disabled">
-                            <i class="bi bi-tags me-1"></i> Paket (Fase 2)
-                        </span>
+                        <a class="nav-link {% if 'packages' in request.path %}active fw-bold text-white{% endif %}" href="{% url 'package_list' %}">
+                            <i class="bi bi-tags me-1"></i> Paket
+                        </a>
                     </li>
                     <!-- Menu dilindungi Feature Flags (D-012) -->
                     {% if feature_checkin %}
@@ -141,4 +141,3 @@
     {% block extra_js %}{% endblock %}
 </body>
 </html>
-

@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar Member{% endblock %}
+
+{% block content %}
+<!-- Header & Aksi Cepat -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-people-fill text-primary me-2"></i>Data Member</h2>
+        <p class="text-muted small mb-0">Kelola informasi member terdaftar di {{ gym_name }}</p>
+    </div>
+    <div>
+        <a href="{% url 'member_create' %}" class="btn btn-primary btn-lg d-flex align-items-center gap-2 shadow-sm">
+            <i class="bi bi-person-plus-fill"></i>
+            <span>Daftar Member Baru</span>
+        </a>
+    </div>
+</div>
+
+<!-- Ringkasan Angka Cepat -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card card-gym p-3 bg-white">
+            <span class="text-secondary small fw-semibold">Total Member Terdaftar</span>
+            <h3 class="fw-bold mb-0 text-dark">{{ total_members }}</h3>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card card-gym p-3 bg-white">
+            <span class="text-secondary small fw-semibold">Member Aktif</span>
+            <h3 class="fw-bold mb-0 text-success">{{ total_active }}</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Kotak Pencarian Kasir (Autofocus untuk kecepatan kerja kasir) -->
+<div class="card card-gym p-3 bg-white mb-4 shadow-sm">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-12 col-md-8 col-lg-9">
+            <div class="input-group input-group-lg">
+                <span class="input-group-text bg-light text-muted border-end-0">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" name="q" value="{{ query }}" class="form-control border-start-0" 
+                       placeholder="Cari berdasarkan Nama, Kode Member (FLX-...), atau No WhatsApp..." 
+                       autofocus>
+                {% if query %}
+                <a href="{% url 'member_list' %}" class="btn btn-outline-secondary" title="Reset Pencarian">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-12 col-md-4 col-lg-3 d-grid">
+            <button type="submit" class="btn btn-dark btn-lg fw-semibold">
+                <i class="bi bi-funnel me-1"></i> Cari Member
+            </button>
+        </div>
+    </form>
+    {% if query %}
+    <div class="mt-2 small text-muted">
+        Menampilkan hasil pencarian untuk: <strong>"{{ query }}"</strong> ({{ members|length }} member ditemukan)
+    </div>
+    {% endif %}
+</div>
+
+<!-- Tabel Daftar Member -->
+<div class="card card-gym p-0 overflow-hidden bg-white shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col" class="ps-4">Kode Member</th>
+                    <th scope="col">Nama Lengkap</th>
+                    <th scope="col">WhatsApp</th>
+                    <th scope="col">Tgl Bergabung</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" class="text-end pe-4">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in members %}
+                <tr>
+                    <td class="ps-4">
+                        <span class="badge bg-dark-subtle text-dark border font-monospace px-2 py-1 fs-6">
+                            {{ member.member_code }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'member_detail' member.pk %}" class="fw-bold text-decoration-none text-dark">
+                            {{ member.full_name }}
+                        </a>
+                        {% if member.notes %}
+                        <div class="small text-muted text-truncate" style="max-width: 200px;">
+                            <i class="bi bi-info-circle me-1"></i>{{ member.notes }}
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if member.phone_wa %}
+                            <a href="{{ member.wa_url }}" target="_blank" class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-1" title="Kirim Pesan WhatsApp">
+                                <i class="bi bi-whatsapp"></i>
+                                <span>{{ member.phone_wa }}</span>
+                            </a>
+                        {% else %}
+                            <span class="text-muted small">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="text-secondary small">
+                            <i class="bi bi-calendar3 me-1"></i> {{ member.join_date|date:"d M Y" }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if member.is_active %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                <i class="bi bi-check-circle-fill me-1"></i> Aktif
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                <i class="bi bi-slash-circle-fill me-1"></i> Nonaktif
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end pe-4">
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'member_detail' member.pk %}" class="btn btn-outline-primary" title="Lihat Profil">
+                                <i class="bi bi-eye"></i> Detail
+                            </a>
+                            <a href="{% url 'member_update' member.pk %}" class="btn btn-outline-secondary" title="Ubah Data">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
+                        {% if query %}
+                            Tidak ditemukan member dengan kata kunci <strong>"{{ query }}"</strong>.
+                            <div class="mt-2">
+                                <a href="{% url 'member_list' %}" class="btn btn-sm btn-outline-primary">Lihat Semua Member</a>
+                            </div>
+                        {% else %}
+                            Belum ada data member terdaftar.
+                            <div class="mt-2">
+                                <a href="{% url 'member_create' %}" class="btn btn-sm btn-primary">Daftarkan Member Pertama</a>
+                            </div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+

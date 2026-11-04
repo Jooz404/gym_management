@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar Paket Keanggotaan{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-tags-fill text-primary me-2"></i>Paket Keanggotaan</h2>
+        <p class="text-muted small mb-0">Kelola jenis paket durasi dan tarif iuran yang berlaku di {{ gym_name }}</p>
+    </div>
+    {% if user.is_owner %}
+    <div>
+        <a href="{% url 'package_create' %}" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
+            <i class="bi bi-plus-circle-fill"></i>
+            <span>Tambah Paket Baru</span>
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card card-gym p-0 overflow-hidden bg-white">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col" class="ps-4">Nama Paket</th>
+                    <th scope="col">Durasi</th>
+                    <th scope="col">Harga Iuran</th>
+                    <th scope="col">Status</th>
+                    {% if user.is_owner %}
+                    <th scope="col" class="text-end pe-4">Aksi</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for package in packages %}
+                <tr>
+                    <td class="ps-4 fw-semibold text-dark">{{ package.name }}</td>
+                    <td>
+                        <span class="badge bg-light text-dark border">
+                            <i class="bi bi-calendar-event me-1 text-primary"></i> {{ package.duration_days }} Hari
+                        </span>
+                    </td>
+                    <td class="fw-bold text-success">{{ package.formatted_price }}</td>
+                    <td>
+                        {% if package.is_active %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                <i class="bi bi-check-circle-fill me-1"></i> Aktif
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
+                                <i class="bi bi-slash-circle-fill me-1"></i> Nonaktif
+                            </span>
+                        {% endif %}
+                    </td>
+                    {% if user.is_owner %}
+                    <td class="text-end pe-4">
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'package_update' package.pk %}" class="btn btn-outline-secondary" title="Ubah Paket">
+                                <i class="bi bi-pencil"></i> Ubah
+                            </a>
+                            <form method="post" action="{% url 'package_toggle_active' package.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn {% if package.is_active %}btn-outline-warning text-dark{% else %}btn-outline-success{% endif %}" title="{% if package.is_active %}Nonaktifkan{% else %}Aktifkan{% endif %}">
+                                    {% if package.is_active %}
+                                        <i class="bi bi-pause-circle"></i> Nonaktifkan
+                                    {% else %}
+                                        <i class="bi bi-play-circle"></i> Aktifkan
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                        Belum ada paket keanggotaan.
+                        {% if user.is_owner %}
+                        <div class="mt-2">
+                            <a href="{% url 'package_create' %}" class="btn btn-sm btn-primary">Tambah Paket Pertama</a>
+                        </div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
