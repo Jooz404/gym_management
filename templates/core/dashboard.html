@@ -1,133 +1,234 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard Utama{% endblock %}
+{% block title %}Dashboard Operasional — {{ gym_name }}{% endblock %}
 
 {% block content %}
+<!-- Banner Sambutan & Status Gym -->
 <div class="row g-3 mb-4">
-    <!-- Banner Sambutan -->
     <div class="col-12">
-        <div class="card card-gym bg-dark text-white p-4 shadow-sm">
+        <div class="card card-gym bg-dark text-white p-4 shadow-sm" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
             <div class="d-md-flex justify-content-between align-items-center">
                 <div>
-                    <span class="badge bg-warning text-dark px-2 py-1 mb-2 fw-semibold">
+                    <span class="badge {% if user.is_owner %}bg-warning text-dark{% else %}bg-primary{% endif %} px-3 py-1 mb-2 fw-semibold">
                         <i class="bi bi-person-badge-fill me-1"></i> Peran: {{ user.get_role_display }}
                     </span>
                     <h2 class="fw-bold mb-1">Halo, {{ user.name|default:user.username }}!</h2>
-                    <p class="text-white-50 mb-0">Selamat datang di Panel Manajemen <strong>{{ gym_name }}</strong> (Zona Waktu: WITA / Asia/Makassar).</p>
+                    <p class="text-white-50 mb-0">Panel Kontrol Operasional <strong>{{ gym_name }}</strong> (Kota Bitung, WITA).</p>
                 </div>
-                <div class="mt-3 mt-md-0 text-md-end">
-                    <span class="text-white-50 small d-block">Status Sistem:</span>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-6">
-                        <i class="bi bi-check-circle-fill me-1"></i> Fondasi Sistem Aktif
-                    </span>
+                <div class="mt-3 mt-md-0 d-flex gap-2">
+                    <a href="{% url 'checkin_page' %}" class="btn btn-warning text-dark fw-bold px-3 shadow-sm d-flex align-items-center gap-1">
+                        <i class="bi bi-qr-code-scan"></i>
+                        <span>Buka Check-in</span>
+                    </a>
+                    <a href="{% url 'member_create' %}" class="btn btn-primary fw-bold px-3 shadow-sm d-flex align-items-center gap-1">
+                        <i class="bi bi-person-plus-fill"></i>
+                        <span>Member Baru</span>
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Kartu Ringkasan Status & Feature Flags (D-012) -->
+<!-- Kartu Ringkasan Operasional Member -->
 <div class="row g-3 mb-4">
-    <div class="col-12 col-md-4">
-        <div class="card card-gym p-3 bg-white h-100">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="text-secondary fw-semibold small">Fitur Check-in</span>
-                {% if feature_checkin %}
-                    <span class="badge bg-success"><i class="bi bi-check-lg"></i> Aktif</span>
-                {% else %}
-                    <span class="badge bg-secondary"><i class="bi bi-x-lg"></i> Nonaktif</span>
-                {% endif %}
-            </div>
-            <h5 class="fw-bold mb-1">Modul Check-in Cepat</h5>
-            <p class="text-muted small mb-3">Pencatatan kehadiran member menggunakan kode member / barcode scanner.</p>
-            <div>
-                {% if feature_checkin %}
-                    <a href="{% url 'feature_checkin_test' %}" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-box-arrow-up-right me-1"></i> Uji Akses Fitur
-                    </a>
-                {% else %}
-                    <button class="btn btn-sm btn-light text-muted" disabled>Fitur Dinonaktifkan</button>
-                {% endif %}
-            </div>
+    <div class="col-6 col-md-3">
+        <div class="card card-gym p-3 bg-white h-100 shadow-sm border-start border-primary border-4">
+            <span class="text-secondary small fw-semibold">Total Member</span>
+            <h2 class="fw-bold text-dark mb-0">{{ total_members }}</h2>
+            <div class="small text-muted mt-1">Terdaftar di sistem</div>
         </div>
     </div>
-
-    <div class="col-12 col-md-4">
-        <div class="card card-gym p-3 bg-white h-100">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="text-secondary fw-semibold small">Fitur Laporan Keuangan</span>
-                {% if feature_reports %}
-                    <span class="badge bg-success"><i class="bi bi-check-lg"></i> Aktif</span>
-                {% else %}
-                    <span class="badge bg-secondary"><i class="bi bi-x-lg"></i> Nonaktif</span>
-                {% endif %}
-            </div>
-            <h5 class="fw-bold mb-1">Laporan Pemasukan</h5>
-            <p class="text-muted small mb-3">Ringkasan pemasukan harian dan bulanan khusus pemilik gym.</p>
-            <div>
-                {% if feature_reports %}
-                    <a href="{% url 'feature_reports_test' %}" class="btn btn-sm btn-outline-success">
-                        <i class="bi bi-box-arrow-up-right me-1"></i> Uji Akses Khusus Owner
-                    </a>
-                {% else %}
-                    <button class="btn btn-sm btn-light text-muted" disabled>Fitur Dinonaktifkan</button>
-                {% endif %}
-            </div>
+    <div class="col-6 col-md-3">
+        <div class="card card-gym p-3 bg-white h-100 shadow-sm border-start border-success border-4">
+            <span class="text-secondary small fw-semibold">Member Aktif</span>
+            <h2 class="fw-bold text-success mb-0">{{ active_count }}</h2>
+            <div class="small text-success mt-1"><i class="bi bi-check-circle-fill"></i> Berhak latihan</div>
         </div>
     </div>
-
-    <div class="col-12 col-md-4">
-        <div class="card card-gym p-3 bg-white h-100">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="text-secondary fw-semibold small">Pengingat WhatsApp</span>
-                {% if feature_wa_reminder %}
-                    <span class="badge bg-success"><i class="bi bi-check-lg"></i> Aktif</span>
-                {% else %}
-                    <span class="badge bg-secondary"><i class="bi bi-x-lg"></i> Nonaktif</span>
-                {% endif %}
-            </div>
-            <h5 class="fw-bold mb-1">Pengingat Perpanjangan</h5>
-            <p class="text-muted small mb-3">Tautan langsung pesan WhatsApp ke member yang masa aktifnya akan habis.</p>
-            <div>
-                {% if feature_wa_reminder %}
-                    <a href="{% url 'feature_wa_test' %}" class="btn btn-sm btn-outline-success">
-                        <i class="bi bi-box-arrow-up-right me-1"></i> Uji Akses Fitur
-                    </a>
-                {% else %}
-                    <button class="btn btn-sm btn-light text-muted" disabled>Fitur Dinonaktifkan</button>
-                {% endif %}
-            </div>
+    <div class="col-6 col-md-3">
+        <div class="card card-gym p-3 bg-white h-100 shadow-sm border-start border-warning border-4">
+            <span class="text-secondary small fw-semibold">Akan Habis (H-7)</span>
+            <h2 class="fw-bold text-warning-emphasis mb-0">{{ expiring_count }}</h2>
+            <div class="small text-warning-emphasis mt-1"><i class="bi bi-clock-history"></i> Siap diingatkan WA</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card card-gym p-3 bg-white h-100 shadow-sm border-start border-danger border-4">
+            <span class="text-secondary small fw-semibold">Kedaluwarsa</span>
+            <h2 class="fw-bold text-danger mb-0">{{ expired_count }}</h2>
+            <div class="small text-danger mt-1"><i class="bi bi-slash-circle-fill"></i> Perlu perpanjangan</div>
         </div>
     </div>
 </div>
 
-<!-- Informasi Roadmap Berikutnya -->
-<div class="row">
-    <div class="col-12">
-        <div class="card card-gym p-4 bg-white">
-            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-signpost-split me-2 text-primary"></i>Status Roadmap Proyek</h5>
-            <div class="d-flex flex-column gap-2">
-                <div class="d-flex align-items-center gap-3 p-2 bg-success-subtle text-success rounded">
-                    <i class="bi bi-check-circle-fill fs-5"></i>
-                    <div>
-                        <strong>Fase 0 — Persiapan:</strong> Dokumen kesepakatan selesai, repo Git aktif, WITA & Flex Gym Bitung terdaftar.
-                    </div>
+<!-- Baris Metrik Keuangan Khusus Owner (D-012) -->
+{% if user.is_owner and feature_reports %}
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6">
+        <div class="card card-gym p-4 bg-white shadow-sm border-start border-success border-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-semibold">Pemasukan Hari Ini ({{ today|date:"d M Y" }})</span>
+                    <h3 class="fw-bold text-success mb-0">Rp{{ today_income|stringformat:"d"|slice:":-3"|default:"0" }}.{{ today_income|stringformat:"d"|slice:"-3:" }}</h3>
+                    {% if today_income == 0 %}<h3 class="fw-bold text-success mb-0">Rp0</h3>{% endif %}
                 </div>
-                <div class="d-flex align-items-center gap-3 p-2 bg-primary-subtle text-primary rounded">
-                    <i class="bi bi-hourglass-split fs-5"></i>
-                    <div>
-                        <strong>Fase 1 — Fondasi (Sedang Berjalan):</strong> Project Django, Custom User Model, Autentikasi Staf & Owner, Feature Flag framework, Layout Bootstrap 5.
-                    </div>
-                </div>
-                <div class="d-flex align-items-center gap-3 p-2 text-muted rounded">
-                    <i class="bi bi-circle fs-5"></i>
-                    <div>
-                        <strong>Fase 2 (Berikutnya):</strong> Pengelolaan Data Member dan Paket Keanggotaan.
-                    </div>
+                <div class="bg-success-subtle text-success p-3 rounded-circle">
+                    <i class="bi bi-cash-stack fs-2"></i>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="card card-gym p-4 bg-white shadow-sm border-start border-info border-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-semibold">Pemasukan Bulan Ini ({{ today|date:"F Y" }})</span>
+                    <h3 class="fw-bold text-primary mb-0">Rp{{ month_income|stringformat:"d"|slice:":-3"|default:"0" }}.{{ month_income|stringformat:"d"|slice:"-3:" }}</h3>
+                    {% if month_income == 0 %}<h3 class="fw-bold text-primary mb-0">Rp0</h3>{% endif %}
+                </div>
+                <div class="bg-info-subtle text-info p-3 rounded-circle">
+                    <i class="bi bi-graph-up-arrow fs-2"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Baris Dua Kolom: Aksi Perpanjangan & Live Check-in -->
+<div class="row g-4">
+    <!-- Kolom Kiri: Member yang Akan Habis dalam 7 Hari -->
+    <div class="col-12 col-lg-7">
+        <div class="card card-gym p-0 overflow-hidden bg-white shadow-sm h-100">
+            <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-bell-fill text-warning fs-5"></i>
+                    <h5 class="fw-bold mb-0 text-dark">Perhatian: Member Akan Habis (H-7)</h5>
+                </div>
+                {% if feature_wa_reminder %}
+                <a href="{% url 'wa_reminders' %}" class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-whatsapp me-1"></i> Semua Pengingat
+                </a>
+                {% endif %}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Member</th>
+                            <th>Paket</th>
+                            <th>Berakhir</th>
+                            <th>Sisa Hari</th>
+                            <th class="text-end pe-4">Aksi Cepat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in expiring_soon_list %}
+                        <tr>
+                            <td class="ps-4">
+                                <a href="{% url 'member_detail' item.member.pk %}" class="fw-bold text-dark text-decoration-none">
+                                    {{ item.member.full_name }}
+                                </a>
+                                <div class="text-muted font-monospace" style="font-size: 0.75rem;">{{ item.member.member_code }}</div>
+                            </td>
+                            <td><span class="badge bg-light text-dark border">{{ item.package.name }}</span></td>
+                            <td>{{ item.end_date|date:"d M Y" }}</td>
+                            <td>
+                                <span class="badge bg-warning text-dark">
+                                    {{ item.days_remaining }} hari lagi
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group btn-group-sm">
+                                    {% if item.wa_url %}
+                                    <a href="{{ item.wa_url }}" target="_blank" class="btn btn-outline-success" title="Kirim Pengingat WhatsApp">
+                                        <i class="bi bi-whatsapp"></i> WA
+                                    </a>
+                                    {% endif %}
+                                    <a href="{% url 'membership_create' item.member.pk %}" class="btn btn-outline-primary" title="Perpanjang Paket">
+                                        <i class="bi bi-credit-card"></i> Perpanjang
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <i class="bi bi-check2-circle fs-3 d-block text-success mb-1"></i>
+                                Tidak ada member yang masa aktifnya akan habis dalam 7 hari ke depan.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kolom Kanan: Check-in Hari Ini (Real-Time Feed) -->
+    <div class="col-12 col-lg-5">
+        <div class="card card-gym p-0 overflow-hidden bg-white shadow-sm h-100">
+            <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-qr-code-scan text-primary fs-5"></i>
+                    <h5 class="fw-bold mb-0 text-dark">Kehadiran Hari Ini</h5>
+                </div>
+                <span class="badge bg-primary font-monospace">{{ today_checkins_count }} Masuk</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Jam</th>
+                            <th>Nama Member</th>
+                            <th class="text-end pe-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in latest_checkins %}
+                        <tr>
+                            <td class="ps-4 font-monospace text-muted">{{ c.checked_in_at|date:"H:i" }}</td>
+                            <td>
+                                <a href="{% url 'member_detail' c.member.pk %}" class="fw-semibold text-dark text-decoration-none">
+                                    {{ c.member.full_name }}
+                                </a>
+                                <div class="text-muted font-monospace" style="font-size: 0.7rem;">{{ c.member.member_code }}</div>
+                            </td>
+                            <td class="text-end pe-4">
+                                {% if c.is_allowed %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Masuk
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Kedaluwarsa
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-muted">
+                                <i class="bi bi-cup-hot fs-3 d-block text-secondary mb-1"></i>
+                                Belum ada kehadiran tercatat hari ini.
+                                <div class="mt-2">
+                                    <a href="{% url 'checkin_page' %}" class="btn btn-sm btn-outline-primary">Mulai Check-in</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if today_checkins_count > 5 %}
+            <div class="card-footer bg-white text-center py-2 border-top">
+                <a href="{% url 'checkin_page' %}" class="text-decoration-none small text-primary fw-semibold">
+                    Lihat semua {{ today_checkins_count }} kehadiran di meja check-in &rarr;
+                </a>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
 {% endblock %}
-

@@ -27,9 +27,9 @@ Buat dan perpanjang membership, catat pembayaran (status terverifikasi otomatis 
 Check-in lewat kode member (D-011), input autofocus dan kompatibel keyboard/scanner USB (D-017), peringatan mencolok untuk member habis (D-008), riwayat kehadiran. Dilindungi `FEATURE_CHECKIN`.
 **Selesai jika:** check-in member aktif sukses, check-in member kedaluwarsa menampilkan peringatan tagihan di kasir, dan modul terkunci jika flag mati. (LULUS 27/27 UNIT TEST)
 
-## Fase 5 — Dashboard, Laporan & Fitur Khusus Owner
+## Fase 5 — Dashboard, Laporan & Fitur Khusus Owner (SELESAI)
 Ringkasan angka kartu dashboard, daftar member akan habis (7 hari) & sudah habis, tombol WhatsApp pesan siap kirim (`FEATURE_WA_REMINDER`), laporan pemasukan harian/bulanan (`FEATURE_REPORTS`), dan tombol 1-klik unduh cadangan database `.sqlite3` bagi owner (D-010).
-**Selesai jika:** angka dashboard cocok dengan data riil transaksi, tombol WhatsApp membuka chat dengan format valid, dan unduhan file backup berjalan normal.
+**Selesai jika:** angka dashboard cocok dengan data riil transaksi, tombol WhatsApp membuka chat dengan format valid, dan unduhan file backup berjalan normal. (LULUS 30/30 UNIT TEST)
 
 ## Fase 6 — Migrasi Data & Uji Coba Lapangan
 Fasilitas impor data awal dari file template CSV, pengujian skenario menyeluruh, panduan singkat untuk staf kasir di Bitung, masa uji coba gym 2–4 minggu.

@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}Pengingat Perpanjangan WhatsApp — {{ gym_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-whatsapp text-success me-2"></i>Pengingat WhatsApp Member</h2>
+        <p class="text-muted small mb-0">Hubungi member secara langsung lewat WhatsApp untuk pengingat masa aktif (D-018)</p>
+    </div>
+    <div>
+        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-6">
+            <i class="bi bi-chat-dots-fill me-1"></i> {{ total_reminder }} Member Perlu Dihubungi
+        </span>
+    </div>
+</div>
+
+<!-- Bagian 1: Member yang Akan Habis (H-7 s/d Hari Ini) -->
+<div class="card card-gym p-0 overflow-hidden bg-white shadow-sm mb-4">
+    <div class="card-header bg-warning-subtle text-warning-emphasis py-3 px-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2"></i>Masa Aktif Akan Segera Habis (H-7 ke Depan)</h5>
+            <div class="small text-muted">Hubungi lebih awal agar member tidak terputus saat datang latihan</div>
+        </div>
+        <span class="badge bg-warning text-dark font-monospace fs-6">{{ expiring_list|length }} Member</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Kode / Nama Member</th>
+                    <th>Nomor WhatsApp</th>
+                    <th>Paket Saat Ini</th>
+                    <th>Tanggal Berakhir</th>
+                    <th>Sisa Hari</th>
+                    <th class="text-end pe-4">Kirim Pesan WA</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in expiring_list %}
+                <tr>
+                    <td class="ps-4">
+                        <a href="{% url 'member_detail' item.member.pk %}" class="fw-bold text-dark text-decoration-none">
+                            {{ item.member.full_name }}
+                        </a>
+                        <div class="text-muted font-monospace small">{{ item.member.member_code }}</div>
+                    </td>
+                    <td>
+                        {% if item.member.phone_wa %}
+                            <span class="font-monospace text-dark">{{ item.member.phone_wa }}</span>
+                        {% else %}
+                            <span class="text-muted small">Tidak ada nomor</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="badge bg-light text-dark border">{{ item.package.name }}</span></td>
+                    <td><strong>{{ item.end_date|date:"d M Y" }}</strong></td>
+                    <td>
+                        <span class="badge bg-warning text-dark px-2 py-1">
+                            {{ item.days_remaining }} Hari Lagi
+                        </span>
+                    </td>
+                    <td class="text-end pe-4">
+                        <div class="btn-group btn-group-sm">
+                            {% if item.wa_url %}
+                            <a href="{{ item.wa_url }}" target="_blank" class="btn btn-success d-flex align-items-center gap-1 shadow-sm">
+                                <i class="bi bi-whatsapp"></i>
+                                <span>Buka Chat WA</span>
+                            </a>
+                            {% else %}
+                            <button class="btn btn-light text-muted" disabled>No WA Kosong</button>
+                            {% endif %}
+                            <a href="{% url 'membership_create' item.member.pk %}" class="btn btn-outline-primary" title="Perpanjang Langsung">
+                                <i class="bi bi-credit-card"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">
+                        <i class="bi bi-check2-circle fs-3 text-success d-block mb-1"></i>
+                        Tidak ada member yang masa aktifnya akan habis dalam 7 hari ke depan.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Bagian 2: Member yang Sudah Kedaluwarsa (1-30 Hari Lalu) -->
+<div class="card card-gym p-0 overflow-hidden bg-white shadow-sm">
+    <div class="card-header bg-danger-subtle text-danger-emphasis py-3 px-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="fw-bold mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Member Baru Saja Kedaluwarsa (1-30 Hari Lalu)</h5>
+            <div class="small text-muted">Ajak kembali member lama untuk memperpanjang paket latihannya</div>
+        </div>
+        <span class="badge bg-danger font-monospace fs-6">{{ expired_list|length }} Member</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Kode / Nama Member</th>
+                    <th>Nomor WhatsApp</th>
+                    <th>Paket Terakhir</th>
+                    <th>Tanggal Habis</th>
+                    <th>Status</th>
+                    <th class="text-end pe-4">Aksi WhatsApp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in expired_list %}
+                <tr>
+                    <td class="ps-4">
+                        <a href="{% url 'member_detail' item.member.pk %}" class="fw-bold text-dark text-decoration-none">
+                            {{ item.member.full_name }}
+                        </a>
+                        <div class="text-muted font-monospace small">{{ item.member.member_code }}</div>
+                    </td>
+                    <td>
+                        {% if item.member.phone_wa %}
+                            <span class="font-monospace text-dark">{{ item.member.phone_wa }}</span>
+                        {% else %}
+                            <span class="text-muted small">Tidak ada nomor</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="badge bg-light text-dark border">{{ item.package.name }}</span></td>
+                    <td>{{ item.end_date|date:"d M Y" }}</td>
+                    <td>
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                            Habis {{ item.days_ago }} hari lalu
+                        </span>
+                    </td>
+                    <td class="text-end pe-4">
+                        <div class="btn-group btn-group-sm">
+                            {% if item.wa_url %}
+                            <a href="{{ item.wa_url }}" target="_blank" class="btn btn-outline-success d-flex align-items-center gap-1">
+                                <i class="bi bi-whatsapp"></i>
+                                <span>Ajak Perpanjang WA</span>
+                            </a>
+                            {% else %}
+                            <button class="btn btn-light text-muted" disabled>No WA Kosong</button>
+                            {% endif %}
+                            <a href="{% url 'membership_create' item.member.pk %}" class="btn btn-outline-primary" title="Perpanjang Langsung">
+                                <i class="bi bi-credit-card"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">
+                        <i class="bi bi-check2-circle fs-3 text-success d-block mb-1"></i>
+                        Tidak ada member yang kedaluwarsa dalam 30 hari terakhir.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Laporan Keuangan & Pemasukan — {{ gym_name }}{% endblock %}
+
+{% block content %}
+<!-- Header Laporan & Tombol Backup Database 1-Klik (D-010) -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-graph-up-arrow text-success me-2"></i>Laporan Keuangan & Omzet</h2>
+        <p class="text-muted small mb-0">Rincian pendapatan kas masuk dari pendaftaran dan perpanjangan member {{ gym_name }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'backup_database' %}" class="btn btn-warning text-dark fw-bold d-flex align-items-center gap-2 shadow-sm">
+            <i class="bi bi-database-down fs-5"></i>
+            <span>Unduh Cadangan Database (.sqlite3)</span>
+        </a>
+    </div>
+</div>
+
+<!-- Filter Rentang Tanggal -->
+<div class="card card-gym p-3 bg-white mb-4 shadow-sm">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-12 col-sm-4 col-md-3">
+            <label class="form-label small fw-semibold text-secondary mb-1">Dari Tanggal:</label>
+            <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}" class="form-control">
+        </div>
+        <div class="col-12 col-sm-4 col-md-3">
+            <label class="form-label small fw-semibold text-secondary mb-1">Sampai Tanggal:</label>
+            <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}" class="form-control">
+        </div>
+        <div class="col-12 col-sm-4 col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary fw-semibold w-100">
+                <i class="bi bi-filter me-1"></i> Terapkan Filter
+            </button>
+            <a href="{% url 'reports_view' %}" class="btn btn-outline-secondary" title="Reset ke Bulan Ini">
+                <i class="bi bi-arrow-clockwise"></i>
+            </a>
+        </div>
+        <div class="col-12 col-md-3 text-md-end small text-muted">
+            Periode: <strong>{{ start_date|date:"d M Y" }}</strong> s/d <strong>{{ end_date|date:"d M Y" }}</strong>
+        </div>
+    </form>
+</div>
+
+<!-- Kartu Ringkasan Omzet Periode Terpilih -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card card-gym p-4 bg-white shadow-sm border-start border-success border-4 h-100">
+            <span class="text-secondary small fw-semibold">Total Pendapatan (Periode Ini)</span>
+            <h2 class="fw-bold text-success mb-1">
+                Rp{{ period_income|stringformat:"d"|slice:":-3"|default:"0" }}.{{ period_income|stringformat:"d"|slice:"-3:" }}
+            </h2>
+            {% if period_income == 0 %}<h2 class="fw-bold text-success mb-1">Rp0</h2>{% endif %}
+            <div class="small text-muted">Total penerimaan kas bersih</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card card-gym p-4 bg-white shadow-sm border-start border-primary border-4 h-100">
+            <span class="text-secondary small fw-semibold">Jumlah Transaksi Lunas</span>
+            <h2 class="fw-bold text-dark mb-1">{{ total_transactions }}</h2>
+            <div class="small text-muted">Total transaksi pembayaran terverifikasi</div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-4">
+        <div class="card card-gym p-4 bg-dark text-white shadow-sm h-100">
+            <span class="text-white-50 small fw-semibold">Keamanan Data Pemilik (D-010)</span>
+            <div class="fw-bold fs-6 mt-1 mb-2">Simpan Salinan Offline Rutin</div>
+            <a href="{% url 'backup_database' %}" class="btn btn-sm btn-outline-warning w-100">
+                <i class="bi bi-download me-1"></i> Unduh File Database Sekarang
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Rincian Metode & Paket Terlaris -->
+<div class="row g-4 mb-4">
+    <!-- Kolom Kiri: Omzet per Metode Pembayaran -->
+    <div class="col-12 col-md-6">
+        <div class="card card-gym p-0 overflow-hidden bg-white shadow-sm h-100">
+            <div class="card-header bg-white py-3 px-4 border-bottom">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-wallet2 text-primary me-2"></i>Rincian per Metode Pembayaran</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Metode</th>
+                            <th class="text-center">Jumlah Transaksi</th>
+                            <th class="text-end pe-4">Subtotal Omzet</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in by_method %}
+                        <tr>
+                            <td class="ps-4 fw-semibold text-dark">{{ m.label }}</td>
+                            <td class="text-center"><span class="badge bg-light text-dark border">{{ m.count }} Transaksi</span></td>
+                            <td class="text-end pe-4 fw-bold text-success">
+                                Rp{{ m.total|stringformat:"d"|slice:":-3"|default:"0" }}.{{ m.total|stringformat:"d"|slice:"-3:" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center py-3 text-muted">Tidak ada transaksi dalam periode ini.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kolom Kanan: Omzet per Paket Keanggotaan -->
+    <div class="col-12 col-md-6">
+        <div class="card card-gym p-0 overflow-hidden bg-white shadow-sm h-100">
+            <div class="card-header bg-white py-3 px-4 border-bottom">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-tags text-success me-2"></i>Rincian per Paket Keanggotaan</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Nama Paket</th>
+                            <th class="text-center">Jumlah Member</th>
+                            <th class="text-end pe-4">Subtotal Omzet</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in by_package %}
+                        <tr>
+                            <td class="ps-4 fw-semibold text-dark">{{ p.membership__package__name }}</td>
+                            <td class="text-center"><span class="badge bg-light text-dark border">{{ p.count }} Member</span></td>
+                            <td class="text-end pe-4 fw-bold text-success">
+                                Rp{{ p.total|stringformat:"d"|slice:":-3"|default:"0" }}.{{ p.total|stringformat:"d"|slice:"-3:" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center py-3 text-muted">Tidak ada transaksi dalam periode ini.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabel Lengkap Riwayat Pembayaran -->
+<div class="card card-gym p-0 overflow-hidden bg-white shadow-sm">
+    <div class="card-header bg-dark text-white py-3 px-4 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0"><i class="bi bi-receipt me-2 text-warning"></i>Daftar Transaksi Pembayaran</h5>
+        <span class="badge bg-secondary font-monospace">{{ payments|length }} Transaksi</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 small">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Waktu (WITA)</th>
+                    <th>No Struk</th>
+                    <th>Nama Member</th>
+                    <th>Paket</th>
+                    <th>Metode</th>
+                    <th>Kasir Pencatat</th>
+                    <th class="text-end">Nominal (Rp)</th>
+                    <th class="text-end pe-4">Struk</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pay in payments %}
+                <tr>
+                    <td class="ps-4 font-monospace text-muted">{{ pay.paid_at|date:"d/m/Y H:i" }}</td>
+                    <td class="font-monospace fw-semibold text-dark">#{{ pay.pk|stringformat:"05d" }}</td>
+                    <td>
+                        <a href="{% url 'member_detail' pay.membership.member.pk %}" class="fw-bold text-dark text-decoration-none">
+                            {{ pay.membership.member.full_name }}
+                        </a>
+                        <div class="text-muted font-monospace small" style="font-size: 0.7rem;">{{ pay.membership.member.member_code }}</div>
+                    </td>
+                    <td><span class="badge bg-light text-dark border">{{ pay.membership.package.name }}</span></td>
+                    <td><span class="badge bg-light text-primary border">{{ pay.get_method_display }}</span></td>
+                    <td>{{ pay.verified_by.name|default:pay.verified_by.username|default:"Staf" }}</td>
+                    <td class="text-end fw-bold text-success">{{ pay.formatted_amount }}</td>
+                    <td class="text-end pe-4">
+                        <a href="{% url 'payment_receipt' pay.pk %}" class="btn btn-sm btn-outline-secondary py-0 px-2" title="Lihat Struk">
+                            <i class="bi bi-receipt"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-2 text-secondary d-block mb-1"></i>
+                        Tidak ada riwayat transaksi pembayaran pada rentang tanggal tersebut.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+

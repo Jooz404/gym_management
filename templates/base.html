@@ -77,7 +77,7 @@
                     
                     {% if user.is_owner and feature_reports %}
                     <li class="nav-item">
-                        <a class="nav-link {% if 'reports' in request.path %}active fw-bold text-white{% endif %}" href="{% url 'feature_reports_test' %}">
+                        <a class="nav-link {% if 'laporan' in request.path %}active fw-bold text-white{% endif %}" href="{% url 'reports_view' %}">
                             <i class="bi bi-graph-up-arrow me-1 text-success"></i> Laporan Keuangan
                         </a>
                     </li>
@@ -85,7 +85,7 @@
 
                     {% if feature_wa_reminder %}
                     <li class="nav-item">
-                        <a class="nav-link {% if 'wa' in request.path %}active fw-bold text-white{% endif %}" href="{% url 'feature_wa_test' %}">
+                        <a class="nav-link {% if 'pengingat-wa' in request.path %}active fw-bold text-white{% endif %}" href="{% url 'wa_reminders' %}">
                             <i class="bi bi-whatsapp me-1 text-success"></i> Pengingat WA
                         </a>
                     </li>
@@ -93,8 +93,14 @@
                 </ul>
 
                 <!-- Profil User & Logout -->
-                <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
-                    <div class="text-white text-lg-end">
+                <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                    {% if user.is_owner %}
+                    <a href="{% url 'backup_database' %}" class="btn btn-outline-warning btn-sm d-flex align-items-center gap-1 shadow-sm" title="Unduh Salinan Cadangan Database SQLite (D-010)">
+                        <i class="bi bi-database-down"></i>
+                        <span class="d-none d-xl-inline">Backup DB</span>
+                    </a>
+                    {% endif %}
+                    <div class="text-white text-lg-end me-1">
                         <div class="fw-semibold small">{{ user.name|default:user.username }}</div>
                         <span class="badge {% if user.is_owner %}bg-warning text-dark{% else %}bg-primary{% endif %} rounded-pill">
                             {{ user.get_role_display }}
