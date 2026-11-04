@@ -180,11 +180,43 @@
                 <h5 class="fw-bold text-dark mb-0">
                     <i class="bi bi-clock-history me-2 text-info"></i>Riwayat Kehadiran (Check-in)
                 </h5>
-                <span class="badge bg-secondary-subtle text-secondary">Fase 4</span>
+                <span class="badge bg-light text-dark border font-monospace">{{ member.checkins.count }} Total Masuk</span>
             </div>
-            <div class="p-3 bg-light rounded text-center text-muted">
-                <i class="bi bi-qr-code-scan fs-3 d-block mb-1 text-info"></i>
-                <p class="mb-0 small">Pencatatan riwayat check-in member menggunakan kode <strong>{{ member.member_code }}</strong> akan aktif pada <strong>Fase 4</strong>.</p>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Waktu (WITA)</th>
+                            <th>Metode</th>
+                            <th>Hasil</th>
+                            <th>Kasir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in member.checkins.all %}
+                        <tr>
+                            <td>{{ c.checked_in_at|date:"d/m/Y H:i" }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ c.get_method_display }}</span></td>
+                            <td>
+                                {% if c.is_allowed %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Aktif
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Kedaluwarsa
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ c.recorded_by.name|default:c.recorded_by.username|default:"—" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-3 text-muted">Belum ada riwayat check-in untuk member ini.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

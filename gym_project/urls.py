@@ -7,5 +7,6 @@ urlpatterns = [
     path('members/', include('members.urls')),
     path('packages/', include('packages.urls')),
     path('memberships/', include('memberships.urls')),
+    path('checkin/', include('checkins.urls')),
     path('', include('core.urls')),
 ]

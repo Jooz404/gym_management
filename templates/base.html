@@ -69,7 +69,7 @@
                     <!-- Menu dilindungi Feature Flags (D-012) -->
                     {% if feature_checkin %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'feature_checkin_test' %}">
+                        <a class="nav-link {% if 'checkin' in request.path %}active fw-bold text-white{% endif %}" href="{% url 'checkin_page' %}">
                             <i class="bi bi-qr-code-scan me-1 text-info"></i> Check-in
                         </a>
                     </li>
@@ -77,7 +77,7 @@
                     
                     {% if user.is_owner and feature_reports %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'feature_reports_test' %}">
+                        <a class="nav-link {% if 'reports' in request.path %}active fw-bold text-white{% endif %}" href="{% url 'feature_reports_test' %}">
                             <i class="bi bi-graph-up-arrow me-1 text-success"></i> Laporan Keuangan
                         </a>
                     </li>
@@ -85,7 +85,7 @@
 
                     {% if feature_wa_reminder %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'feature_wa_test' %}">
+                        <a class="nav-link {% if 'wa' in request.path %}active fw-bold text-white{% endif %}" href="{% url 'feature_wa_test' %}">
                             <i class="bi bi-whatsapp me-1 text-success"></i> Pengingat WA
                         </a>
                     </li>

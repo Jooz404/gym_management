@@ -23,9 +23,9 @@ CRUD member (tambah, ubah, cari nama/kode, sanitasi nomor WA otomatis D-018), CR
 Buat dan perpanjang membership, catat pembayaran (status terverifikasi otomatis oleh staf D-016), kalkulasi aturan masa aktif sesuai `DATA_MODEL.md` (menjaga akumulasi sisa hari aktif jika diperpanjang sebelum habis).
 **Selesai jika:** unit test aturan perpanjangan lulus (skenario member aktif dan member kedaluwarsa). (LULUS 21/21 UNIT TEST)
 
-## Fase 4 — Check-in Cepat
+## Fase 4 — Check-in Cepat (SELESAI)
 Check-in lewat kode member (D-011), input autofocus dan kompatibel keyboard/scanner USB (D-017), peringatan mencolok untuk member habis (D-008), riwayat kehadiran. Dilindungi `FEATURE_CHECKIN`.
-**Selesai jika:** check-in member aktif sukses, check-in member kedaluwarsa menampilkan peringatan tagihan di kasir, dan modul terkunci jika flag mati.
+**Selesai jika:** check-in member aktif sukses, check-in member kedaluwarsa menampilkan peringatan tagihan di kasir, dan modul terkunci jika flag mati. (LULUS 27/27 UNIT TEST)
 
 ## Fase 5 — Dashboard, Laporan & Fitur Khusus Owner
 Ringkasan angka kartu dashboard, daftar member akan habis (7 hari) & sudah habis, tombol WhatsApp pesan siap kirim (`FEATURE_WA_REMINDER`), laporan pemasukan harian/bulanan (`FEATURE_REPORTS`), dan tombol 1-klik unduh cadangan database `.sqlite3` bagi owner (D-010).
