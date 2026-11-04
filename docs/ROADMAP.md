@@ -19,9 +19,9 @@ Project Django, konfigurasi `.env` (+ `.env.example`), Custom User model (`Abstr
 CRUD member (tambah, ubah, cari nama/kode, sanitasi nomor WA otomatis D-018), CRUD paket (nama, durasi, harga, aktif/nonaktif).
 **Selesai jika:** bisa menambah 20 member contoh dan mencarinya berdasarkan nama atau kode secara instan. (LULUS 17/17 UNIT TEST)
 
-## Fase 3 — Keanggotaan dan pembayaran
+## Fase 3 — Keanggotaan dan pembayaran (SELESAI)
 Buat dan perpanjang membership, catat pembayaran (status terverifikasi otomatis oleh staf D-016), kalkulasi aturan masa aktif sesuai `DATA_MODEL.md` (menjaga akumulasi sisa hari aktif jika diperpanjang sebelum habis).
-**Selesai jika:** unit test aturan perpanjangan lulus (skenario member aktif dan member kedaluwarsa).
+**Selesai jika:** unit test aturan perpanjangan lulus (skenario member aktif dan member kedaluwarsa). (LULUS 21/21 UNIT TEST)
 
 ## Fase 4 — Check-in Cepat
 Check-in lewat kode member (D-011), input autofocus dan kompatibel keyboard/scanner USB (D-017), peringatan mencolok untuk member habis (D-008), riwayat kehadiran. Dilindungi `FEATURE_CHECKIN`.

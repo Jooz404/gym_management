@@ -80,3 +80,48 @@ class Member(models.Model):
         if not self.phone_wa:
             return ""
         return f"https://wa.me/{self.phone_wa}"
+
+    @property
+    def latest_membership(self):
+        """Periode membership terakhir milik member ini."""
+        return self.memberships.order_by('-end_date').first()
+
+    @property
+    def is_membership_active(self) -> bool:
+        """Status aktif dihitung dinamis dari end_date (D-003)."""
+        latest = self.latest_membership
+        if not latest:
+            return False
+        return latest.end_date >= timezone.localdate()
+
+    @property
+    def days_remaining(self) -> int:
+        """Sisa hari aktif membership."""
+        latest = self.latest_membership
+        if not latest:
+            return 0
+        return latest.days_remaining
+
+    @property
+    def membership_status(self) -> str:
+        """Status string terhitung untuk logic badge UI."""
+        latest = self.latest_membership
+        if not latest:
+            return 'no_membership'
+        today = timezone.localdate()
+        if latest.end_date < today:
+            return 'expired'
+        elif 0 <= (latest.end_date - today).days <= 7:
+            return 'expiring_soon'
+        else:
+            return 'active'
+
+    @property
+    def membership_status_display(self) -> str:
+        status_map = {
+            'no_membership': 'Belum Ada Paket',
+            'expired': 'Kedaluwarsa',
+            'expiring_soon': 'Akan Habis',
+            'active': 'Aktif',
+        }
+        return status_map.get(self.membership_status, 'Tidak Diketahui')

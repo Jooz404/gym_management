@@ -12,9 +12,15 @@
                 <span class="badge bg-warning text-dark px-2 py-1 fw-bold">
                     <i class="bi bi-lightning-charge-fill"></i> {{ gym_name }}
                 </span>
-                <span class="badge {% if member.is_active %}bg-success{% else %}bg-secondary{% endif %}">
-                    {% if member.is_active %}Member Aktif{% else %}Nonaktif{% endif %}
-                </span>
+                {% if member.membership_status == 'active' %}
+                    <span class="badge bg-success px-2 py-1"><i class="bi bi-check-circle-fill me-1"></i> Member Aktif</span>
+                {% elif member.membership_status == 'expiring_soon' %}
+                    <span class="badge bg-warning text-dark px-2 py-1"><i class="bi bi-exclamation-triangle-fill me-1"></i> Akan Habis ({{ member.days_remaining }} hari)</span>
+                {% elif member.membership_status == 'expired' %}
+                    <span class="badge bg-danger px-2 py-1"><i class="bi bi-slash-circle me-1"></i> Kedaluwarsa</span>
+                {% else %}
+                    <span class="badge bg-secondary px-2 py-1">Belum Ada Paket</span>
+                {% endif %}
             </div>
             
             <div class="text-center my-3">
@@ -66,22 +72,105 @@
         </div>
     </div>
 
-    <!-- Kolom Kanan: Status Membership & Riwayat Kehadiran (Fase 3 & 4) -->
+    <!-- Kolom Kanan: Status Membership & Riwayat Kehadiran -->
     <div class="col-12 col-lg-7">
         <!-- Kotak Status Membership (Fase 3) -->
         <div class="card card-gym p-4 bg-white shadow-sm mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold text-dark mb-0">
-                    <i class="bi bi-card-checklist me-2 text-primary"></i>Status Keanggotaan & Paket
-                </h5>
-                <span class="badge bg-secondary-subtle text-secondary">Fase 3</span>
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-card-checklist me-2 text-primary"></i>Status Keanggotaan & Masa Aktif
+                    </h5>
+                    <span class="text-muted small">Periode masa aktif dihitung otomatis dari paket</span>
+                </div>
+                <a href="{% url 'membership_create' member.pk %}" class="btn btn-primary d-flex align-items-center gap-1 fw-semibold shadow-sm">
+                    <i class="bi bi-plus-circle-fill"></i>
+                    <span>Perpanjang / Beli Paket</span>
+                </a>
             </div>
-            <div class="p-4 bg-light rounded text-center text-muted">
-                <i class="bi bi-calendar-check fs-2 d-block mb-2 text-primary"></i>
-                <p class="mb-2">Periode keanggotaan dan pencatatan pembayaran akan aktif pada <strong>Fase 3</strong>.</p>
-                <button class="btn btn-primary btn-sm disabled" title="Akan aktif di Fase 3">
-                    <i class="bi bi-plus-circle me-1"></i> Buat / Perpanjang Membership
-                </button>
+
+            <!-- Tampilan Ringkasan Paket Aktif Terkini -->
+            {% if member.latest_membership %}
+                {% with latest=member.latest_membership %}
+                <div class="p-3 rounded border mb-3 {% if member.membership_status == 'active' %}bg-success-subtle border-success-subtle text-dark{% elif member.membership_status == 'expiring_soon' %}bg-warning-subtle border-warning-subtle text-dark{% else %}bg-danger-subtle border-danger-subtle text-dark{% endif %}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="badge {% if member.membership_status == 'active' %}bg-success{% elif member.membership_status == 'expiring_soon' %}bg-warning text-dark{% else %}bg-danger{% endif %} mb-1">
+                                {{ member.membership_status_display }}
+                            </span>
+                            <h4 class="fw-bold mb-1">{{ latest.package.name }}</h4>
+                            <div class="small">
+                                Periode: <strong>{{ latest.start_date|date:"d M Y" }}</strong> s/d <strong>{{ latest.end_date|date:"d M Y" }}</strong>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            {% if member.is_membership_active %}
+                                <div class="display-6 fw-bold text-success">{{ member.days_remaining }}</div>
+                                <div class="small text-muted">Hari Tersisa</div>
+                            {% else %}
+                                <div class="text-danger fw-bold fs-5 mt-2">Kedaluwarsa</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endwith %}
+            {% else %}
+                <div class="p-4 bg-light rounded text-center text-muted mb-3 border">
+                    <i class="bi bi-exclamation-circle fs-2 d-block mb-2 text-secondary"></i>
+                    <p class="mb-2">Member ini belum memiliki paket keanggotaan aktif.</p>
+                    <a href="{% url 'membership_create' member.pk %}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i> Aktifkan Paket Pertama
+                    </a>
+                </div>
+            {% endif %}
+
+            <!-- Tabel Riwayat Keanggotaan & Pembayaran -->
+            <h6 class="fw-bold text-dark mt-3 mb-2">Riwayat Periode Keanggotaan:</h6>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Paket</th>
+                            <th>Mulai</th>
+                            <th>Berakhir</th>
+                            <th>Pembayaran</th>
+                            <th>Metode</th>
+                            <th class="text-end">Struk</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ms in member.memberships.all %}
+                        <tr>
+                            <td class="fw-semibold text-dark">{{ ms.package.name }}</td>
+                            <td>{{ ms.start_date|date:"d/m/Y" }}</td>
+                            <td>{{ ms.end_date|date:"d/m/Y" }}</td>
+                            <td>
+                                {% for p in ms.payments.all %}
+                                    <span class="fw-bold text-success">{{ p.formatted_amount }}</span>
+                                {% empty %}
+                                    <span class="text-muted">—</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for p in ms.payments.all %}
+                                    <span class="badge bg-light text-dark border">{{ p.get_method_display }}</span>
+                                {% endfor %}
+                            </td>
+                            <td class="text-end">
+                                {% for p in ms.payments.all %}
+                                    <a href="{% url 'payment_receipt' p.pk %}" class="btn btn-outline-secondary btn-sm py-0 px-2" title="Lihat Struk">
+                                        <i class="bi bi-receipt"></i>
+                                    </a>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-3 text-muted">Belum ada riwayat transaksi.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -93,12 +182,11 @@
                 </h5>
                 <span class="badge bg-secondary-subtle text-secondary">Fase 4</span>
             </div>
-            <div class="p-4 bg-light rounded text-center text-muted">
-                <i class="bi bi-qr-code-scan fs-2 d-block mb-2 text-info"></i>
-                <p class="mb-0">Pencatatan riwayat check-in member menggunakan kode <strong>{{ member.member_code }}</strong> akan aktif pada <strong>Fase 4</strong>.</p>
+            <div class="p-3 bg-light rounded text-center text-muted">
+                <i class="bi bi-qr-code-scan fs-3 d-block mb-1 text-info"></i>
+                <p class="mb-0 small">Pencatatan riwayat check-in member menggunakan kode <strong>{{ member.member_code }}</strong> akan aktif pada <strong>Fase 4</strong>.</p>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
-

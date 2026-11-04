@@ -73,8 +73,8 @@
                     <th scope="col" class="ps-4">Kode Member</th>
                     <th scope="col">Nama Lengkap</th>
                     <th scope="col">WhatsApp</th>
+                    <th scope="col">Status Masa Aktif</th>
                     <th scope="col">Tgl Bergabung</th>
-                    <th scope="col">Status</th>
                     <th scope="col" class="text-end pe-4">Aksi</th>
                 </tr>
             </thead>
@@ -107,25 +107,42 @@
                         {% endif %}
                     </td>
                     <td>
+                        {% if member.membership_status == 'active' %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                <i class="bi bi-check-circle-fill me-1"></i> Aktif ({{ member.days_remaining }} hr)
+                            </span>
+                            <div class="small text-muted font-monospace" style="font-size: 0.75rem;">
+                                s/d {{ member.latest_membership.end_date|date:"d M Y" }}
+                            </div>
+                        {% elif member.membership_status == 'expiring_soon' %}
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> Habis {{ member.days_remaining }} hr
+                            </span>
+                            <div class="small text-muted font-monospace" style="font-size: 0.75rem;">
+                                s/d {{ member.latest_membership.end_date|date:"d M Y" }}
+                            </div>
+                        {% elif member.membership_status == 'expired' %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                <i class="bi bi-slash-circle me-1"></i> Kedaluwarsa
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                Belum Ada Paket
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
                         <span class="text-secondary small">
                             <i class="bi bi-calendar3 me-1"></i> {{ member.join_date|date:"d M Y" }}
                         </span>
                     </td>
-                    <td>
-                        {% if member.is_active %}
-                            <span class="badge bg-success-subtle text-success border border-success-subtle">
-                                <i class="bi bi-check-circle-fill me-1"></i> Aktif
-                            </span>
-                        {% else %}
-                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
-                                <i class="bi bi-slash-circle-fill me-1"></i> Nonaktif
-                            </span>
-                        {% endif %}
-                    </td>
                     <td class="text-end pe-4">
                         <div class="btn-group btn-group-sm">
+                            <a href="{% url 'membership_create' member.pk %}" class="btn btn-outline-success" title="Perpanjang / Beli Paket">
+                                <i class="bi bi-credit-card"></i> Paket
+                            </a>
                             <a href="{% url 'member_detail' member.pk %}" class="btn btn-outline-primary" title="Lihat Profil">
-                                <i class="bi bi-eye"></i> Detail
+                                <i class="bi bi-eye"></i>
                             </a>
                             <a href="{% url 'member_update' member.pk %}" class="btn btn-outline-secondary" title="Ubah Data">
                                 <i class="bi bi-pencil"></i>
@@ -156,4 +173,3 @@
     </div>
 </div>
 {% endblock %}
-

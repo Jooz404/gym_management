@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} — {{ gym_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    @media print {
+        body {
+            background-color: #fff !important;
+        }
+        nav, footer, .no-print {
+            display: none !important;
+        }
+        .receipt-card {
+            box-shadow: none !important;
+            border: 1px solid #ccc !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-3">
+    <div class="col-12 col-md-8 col-lg-6">
+        <!-- Aksi Atas (Bukan untuk cetak) -->
+        <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+            <a href="{% url 'member_detail' member.pk %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Kembali ke Member
+            </a>
+            <div class="d-flex gap-2">
+                <button onclick="window.print()" class="btn btn-outline-dark btn-sm">
+                    <i class="bi bi-printer me-1"></i> Cetak Struk
+                </button>
+                {% if wa_receipt_url %}
+                <a href="{{ wa_receipt_url }}" target="_blank" class="btn btn-success btn-sm">
+                    <i class="bi bi-whatsapp me-1"></i> Kirim Struk via WA
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Kartu Struk Transaksi -->
+        <div class="card card-gym receipt-card bg-white p-4 p-md-5 shadow-sm border">
+            <!-- Header Struk -->
+            <div class="text-center pb-3 border-bottom mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center bg-dark text-warning p-2 rounded-circle mb-2">
+                    <i class="bi bi-lightning-charge-fill fs-3"></i>
+                </div>
+                <h4 class="fw-bold mb-0 text-dark">{{ gym_name }}</h4>
+                <div class="text-muted small">Kota Bitung, Sulawesi Utara (WITA)</div>
+                <div class="badge bg-light text-dark border font-monospace mt-2">
+                    BUKTI PEMBAYARAN RESMI #{{ payment.pk|stringformat:"05d" }}
+                </div>
+            </div>
+
+            <!-- Detail Transaksi -->
+            <div class="mb-4">
+                <div class="row g-2 small mb-3">
+                    <div class="col-6 text-muted">Tanggal / Waktu:</div>
+                    <div class="col-6 text-end fw-semibold text-dark">{{ payment.paid_at|date:"d M Y, H:i" }} WITA</div>
+
+                    <div class="col-6 text-muted">Kasir yang Mencatat:</div>
+                    <div class="col-6 text-end fw-semibold text-dark">{{ payment.verified_by.name|default:payment.verified_by.username|default:"Staf Kasir" }}</div>
+
+                    <div class="col-6 text-muted">Metode Pembayaran:</div>
+                    <div class="col-6 text-end fw-semibold text-primary">{{ payment.get_method_display }}</div>
+                </div>
+
+                <div class="p-3 bg-light rounded border mb-3">
+                    <div class="small text-muted mb-1">DITERIMA DARI:</div>
+                    <h5 class="fw-bold text-dark mb-0">{{ member.full_name }}</h5>
+                    <div class="small font-monospace text-secondary">Kode Member: {{ member.member_code }}</div>
+                    {% if member.phone_wa %}
+                    <div class="small text-muted">WA: {{ member.phone_wa }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Rincian Paket</th>
+                                <th class="text-end">Durasi</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <strong>{{ membership.package.name }}</strong>
+                                    <div class="small text-muted">
+                                        Masa aktif: {{ membership.start_date|date:"d/m/Y" }} s/d {{ membership.end_date|date:"d/m/Y" }}
+                                    </div>
+                                </td>
+                                <td class="text-end">{{ membership.package.duration_days }} Hari</td>
+                                <td class="text-end fw-bold">{{ payment.formatted_amount }}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-group-divider">
+                                <th colspan="2" class="fs-6">TOTAL PEMBAYARAN:</th>
+                                <th class="text-end text-success fs-5">{{ payment.formatted_amount }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                {% if payment.note %}
+                <div class="small text-muted mt-2">
+                    <strong>Catatan:</strong> {{ payment.note }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Footer Struk -->
+            <div class="text-center pt-3 border-top text-muted small">
+                <div class="fw-semibold text-dark mb-1">Status: LUNAS & TERVERIFIKASI</div>
+                <div>Simpan bukti pembayaran ini sebagai tanda pengenal keanggotaan Anda.</div>
+                <div class="mt-2 text-secondary font-monospace" style="font-size: 0.75rem;">
+                    Dicetak otomatis oleh Sistem Manajemen {{ gym_name }}
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-3 no-print">
+            <a href="{% url 'member_detail' member.pk %}" class="btn btn-primary px-4 fw-bold">
+                <i class="bi bi-person-badge me-1"></i> Kembali ke Profil Member
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
