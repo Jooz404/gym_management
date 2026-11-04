@@ -3,12 +3,13 @@
 Aturan: satu fase selesai dan diuji, baru lanjut. Setiap fase punya "Selesai jika" yang harus terpenuhi.
 
 ## Fase 0 — Persiapan (sebelum coding)
-- [x] `PROJECT_BRIEF.md`: semua parameter utama dan konteks gym (Bitung, Sulut) terisi
+- [x] `PROJECT_BRIEF.md`: semua parameter utama dan konteks gym (Flex Gym Bitung, Sulut) terisi
 - [x] `DECISIONS.md`: semua keputusan terbuka (D-007 s/d D-010) & penambahan D-015 s/d D-018 disetujui
 - [x] Pemahaman ringkasan agent telah disetujui oleh pemilik proyek
-- [ ] Repositori git dibuat, branch `main` dan aturan alur kerja D-013 berlaku
-- [ ] Environment Python (virtual environment, Django, dependensi minimal) terpasang
-**Selesai jika:** repositori git aktif, env siap, struktur dasar siap tanpa konflik konfigurasi.
+- [x] Repositori git dibuat, branch `main` dan aturan alur kerja D-013 berlaku
+- [x] Template impor CSV catatan kertas disiapkan (`docs/template_import_member.csv`)
+- [x] Environment Python (virtual environment, Django 5.1, python-dotenv) terpasang
+**Selesai jika:** repositori git aktif, env siap, struktur dasar siap tanpa konflik konfigurasi. (SELESAI)
 
 ## Fase 1 — Fondasi
 Project Django, konfigurasi `.env` (+ `.env.example`), Custom User model (`AbstractUser` dengan role `owner` & `staff`), zona waktu WITA (`Asia/Makassar`), SQLite + migrasi awal, login dua peran, kerangka feature flag (`FEATURE_CHECKIN`, `FEATURE_REPORTS`, `FEATURE_WA_REMINDER`) dan pengaturan per gym (D-014), layout dasar responsif dengan Bootstrap 5.
