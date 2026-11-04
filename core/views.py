@@ -1,7 +1,6 @@
 import os
 import urllib.parse
 from datetime import timedelta
-from io import BytesIO
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -257,6 +256,7 @@ def backup_database(request):
     Cadangan Database 1-Klik Khusus Owner (D-010).
     Mengunduh salinan berkas db.sqlite3 secara instan ke komputer pemilik gym.
     """
+    from io import BytesIO
     db_path = settings.BASE_DIR / 'db.sqlite3'
     timestamp = timezone.localtime().strftime('%Y%m%d_%H%M')
     filename = f"backup_flexgym_{timestamp}.sqlite3"

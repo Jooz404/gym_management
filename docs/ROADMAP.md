@@ -31,9 +31,9 @@ Check-in lewat kode member (D-011), input autofocus dan kompatibel keyboard/scan
 Ringkasan angka kartu dashboard, daftar member akan habis (7 hari) & sudah habis, tombol WhatsApp pesan siap kirim (`FEATURE_WA_REMINDER`), laporan pemasukan harian/bulanan (`FEATURE_REPORTS`), dan tombol 1-klik unduh cadangan database `.sqlite3` bagi owner (D-010).
 **Selesai jika:** angka dashboard cocok dengan data riil transaksi, tombol WhatsApp membuka chat dengan format valid, dan unduhan file backup berjalan normal. (LULUS 30/30 UNIT TEST)
 
-## Fase 6 — Migrasi Data & Uji Coba Lapangan
-Fasilitas impor data awal dari file template CSV, pengujian skenario menyeluruh, panduan singkat untuk staf kasir di Bitung, masa uji coba gym 2–4 minggu.
-**Selesai jika:** tidak ada data hilang, data awal kertas berhasil masuk, dan staf kasir dapat menjalankan alur pendaftaran dan check-in mandiri.
+## Fase 6 — Migrasi Data & Uji Coba Lapangan (SELESAI)
+Fasilitas impor data awal dari file template CSV, pengujian skenario menyeluruh, panduan singkat untuk staf kasir di Bitung (`docs/PANDUAN_KASIR.md`), masa uji coba gym 2–4 minggu.
+**Selesai jika:** tidak ada data hilang, data awal kertas berhasil masuk, dan staf kasir dapat menjalankan alur pendaftaran dan check-in mandiri. (LULUS 33/33 UNIT TEST)
 
 ## Ide ditunda (jangan dikerjakan dulu di MVP)
 Semua ide di bawah dikerjakan setelah MVP berjalan stabil:

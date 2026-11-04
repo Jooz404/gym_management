@@ -1,6 +1,9 @@
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
 from accounts.models import User
+from packages.models import Package
+from memberships.models import Membership
 from members.models import Member, sanitize_phone_number
 
 
@@ -13,6 +16,13 @@ class MemberModelAndViewsTest(TestCase):
             role=User.Role.STAFF
         )
         self.client.login(username='staff_member', password='password123')
+
+        self.pkg = Package.objects.create(
+            name='Paket Bulanan',
+            duration_days=30,
+            price=300000,
+            is_active=True
+        )
 
         # Buat 20 member untuk menguji kriteria berhasil (Definition of Done) Fase 2
         self.members = []
@@ -79,3 +89,32 @@ class MemberModelAndViewsTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, target.full_name)
         self.assertContains(resp, target.member_code)
+
+    def test_download_import_template(self):
+        resp = self.client.get(reverse('download_import_template'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.has_header('Content-Disposition'))
+        self.assertIn('.csv', resp['Content-Disposition'])
+
+    def test_member_import_csv_valid(self):
+        csv_content = (
+            "nama_lengkap,nomor_whatsapp,tanggal_bergabung,nama_paket,tanggal_mulai,tanggal_berakhir,catatan\n"
+            "Member Migrasi Satu,081233445566,2026-11-01,Paket Bulanan,2026-11-01,2026-12-01,Buku kertas lama\n"
+            "Member Migrasi Dua,082299887711,2026-10-15,Paket Bulanan,2026-10-15,2026-11-15,Member tetap\n"
+        ).encode('utf-8')
+
+        uploaded = SimpleUploadedFile("data_lama.csv", csv_content, content_type="text/csv")
+        resp = self.client.post(reverse('member_import_csv'), {'csv_file': uploaded}, follow=True)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Sebanyak 2 data member berhasil dimasukkan")
+
+        m1 = Member.objects.filter(full_name='Member Migrasi Satu').first()
+        self.assertIsNotNone(m1)
+        self.assertEqual(m1.phone_wa, '6281233445566')
+        self.assertTrue(m1.memberships.exists())
+
+    def test_member_import_csv_invalid_file(self):
+        uploaded = SimpleUploadedFile("file_salah.txt", b"Bukan csv", content_type="text/plain")
+        resp = self.client.post(reverse('member_import_csv'), {'csv_file': uploaded}, follow=True)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Format berkas harus berekstensi .csv")
