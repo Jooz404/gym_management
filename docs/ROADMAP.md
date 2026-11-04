@@ -11,9 +11,9 @@ Aturan: satu fase selesai dan diuji, baru lanjut. Setiap fase punya "Selesai jik
 - [x] Environment Python (virtual environment, Django 5.1, python-dotenv) terpasang
 **Selesai jika:** repositori git aktif, env siap, struktur dasar siap tanpa konflik konfigurasi. (SELESAI)
 
-## Fase 1 — Fondasi
+## Fase 1 — Fondasi (SELESAI)
 Project Django, konfigurasi `.env` (+ `.env.example`), Custom User model (`AbstractUser` dengan role `owner` & `staff`), zona waktu WITA (`Asia/Makassar`), SQLite + migrasi awal, login dua peran, kerangka feature flag (`FEATURE_CHECKIN`, `FEATURE_REPORTS`, `FEATURE_WA_REMINDER`) dan pengaturan per gym (D-014), layout dasar responsif dengan Bootstrap 5.
-**Selesai jika:** staf dan owner bisa login, halaman terproteksi menolak yang belum login, role permission berjalan, dan mengubah flag di konfigurasi menyembunyikan/menampilkan menu terkait.
+**Selesai jika:** staf dan owner bisa login, halaman terproteksi menolak yang belum login, role permission berjalan, dan mengubah flag di konfigurasi menyembunyikan/menampilkan menu terkait. (LULUS 7/7 UNIT TEST)
 
 ## Fase 2 — Member dan paket
 CRUD member (tambah, ubah, cari nama/kode, sanitasi nomor WA otomatis D-018), CRUD paket (nama, durasi, harga, aktif/nonaktif).
