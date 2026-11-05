@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load gym_tags %}
 
 {% block title %}Laporan Keuangan & Pemasukan — {{ gym_name }}{% endblock %}
 
@@ -47,10 +48,7 @@
     <div class="col-12 col-md-6 col-lg-4">
         <div class="card card-gym p-4 bg-white shadow-sm border-start border-success border-4 h-100">
             <span class="text-secondary small fw-semibold">Total Pendapatan (Periode Ini)</span>
-            <h2 class="fw-bold text-success mb-1">
-                Rp{{ period_income|stringformat:"d"|slice:":-3"|default:"0" }}.{{ period_income|stringformat:"d"|slice:"-3:" }}
-            </h2>
-            {% if period_income == 0 %}<h2 class="fw-bold text-success mb-1">Rp0</h2>{% endif %}
+            <h2 class="fw-bold text-success mb-1">{{ period_income|rupiah }}</h2>
             <div class="small text-muted">Total penerimaan kas bersih</div>
         </div>
     </div>
@@ -94,9 +92,7 @@
                         <tr>
                             <td class="ps-4 fw-semibold text-dark">{{ m.label }}</td>
                             <td class="text-center"><span class="badge bg-light text-dark border">{{ m.count }} Transaksi</span></td>
-                            <td class="text-end pe-4 fw-bold text-success">
-                                Rp{{ m.total|stringformat:"d"|slice:":-3"|default:"0" }}.{{ m.total|stringformat:"d"|slice:"-3:" }}
-                            </td>
+                            <td class="text-end pe-4 fw-bold text-success">{{ m.total|rupiah }}</td>
                         </tr>
                         {% empty %}
                         <tr>
@@ -129,9 +125,7 @@
                         <tr>
                             <td class="ps-4 fw-semibold text-dark">{{ p.membership__package__name }}</td>
                             <td class="text-center"><span class="badge bg-light text-dark border">{{ p.count }} Member</span></td>
-                            <td class="text-end pe-4 fw-bold text-success">
-                                Rp{{ p.total|stringformat:"d"|slice:":-3"|default:"0" }}.{{ p.total|stringformat:"d"|slice:"-3:" }}
-                            </td>
+                            <td class="text-end pe-4 fw-bold text-success">{{ p.total|rupiah }}</td>
                         </tr>
                         {% empty %}
                         <tr>
@@ -199,4 +193,3 @@
     </div>
 </div>
 {% endblock %}
-
