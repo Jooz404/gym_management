@@ -13,6 +13,7 @@ def checkin_page(request):
     """
     Halaman Check-in Cepat Resepsionis (D-008, D-011, D-017).
     Memeriksa masa aktif secara instan saat kode dimasukkan / discan.
+    Mencegah member dengan akun nonaktif/diblokir untuk masuk.
     """
     last_result = None
     form = CheckinForm()
@@ -30,40 +31,56 @@ def checkin_page(request):
                     'title': 'KODE TIDAK DITEMUKAN',
                     'message': f"Member dengan kode '{code}' tidak terdaftar dalam sistem.",
                 }
-            else:
+            elif not member.is_active:
+                # Member dalam status nonaktif / diblokir oleh gym
+                checkin = Checkin.objects.create(
+                    member=member,
+                    method=Checkin.Method.CODE,
+                    result=Checkin.Result.BLOCKED,
+                    recorded_by=request.user,
+                    notes="Akun dinonaktifkan / diblokir"
+                )
+                last_result = {
+                    'status': 'blocked',
+                    'member': member,
+                    'checkin': checkin,
+                    'title': 'AKSES DITOLAK: AKUN NONAKTIF / DIBLOKIR!',
+                    'message': f"Akun member '{member.full_name}' telah dinonaktifkan oleh manajemen gym. Akses check-in ditolak.",
+                    'end_date': member.latest_membership.end_date if member.latest_membership else None,
+                }
+            elif member.is_membership_active:
                 # Periksa keaktifan masa aktif member (D-003, D-008)
-                if member.is_membership_active:
-                    checkin = Checkin.objects.create(
-                        member=member,
-                        method=Checkin.Method.CODE,
-                        result=Checkin.Result.ALLOWED,
-                        recorded_by=request.user
-                    )
-                    last_result = {
-                        'status': 'allowed',
-                        'member': member,
-                        'checkin': checkin,
-                        'title': 'CHECK-IN BERHASIL (MEMBER AKTIF)',
-                        'message': f"Selamat Datang, {member.full_name}!",
-                        'end_date': member.latest_membership.end_date,
-                        'days_remaining': member.days_remaining,
-                    }
-                else:
-                    # Member kedaluwarsa atau belum berpaket -> catat peringatan (D-008)
-                    checkin = Checkin.objects.create(
-                        member=member,
-                        method=Checkin.Method.CODE,
-                        result=Checkin.Result.EXPIRED_WARNING,
-                        recorded_by=request.user
-                    )
-                    last_result = {
-                        'status': 'expired_warning',
-                        'member': member,
-                        'checkin': checkin,
-                        'title': 'PERINGATAN: MASA AKTIF KEDALUWARSA!',
-                        'message': f"Keanggotaan {member.full_name} sudah habis atau belum memiliki paket aktif. Silakan tagih perpanjangan.",
-                        'end_date': member.latest_membership.end_date if member.latest_membership else None,
-                    }
+                checkin = Checkin.objects.create(
+                    member=member,
+                    method=Checkin.Method.CODE,
+                    result=Checkin.Result.ALLOWED,
+                    recorded_by=request.user
+                )
+                last_result = {
+                    'status': 'allowed',
+                    'member': member,
+                    'checkin': checkin,
+                    'title': 'CHECK-IN BERHASIL (MEMBER AKTIF)',
+                    'message': f"Selamat Datang, {member.full_name}!",
+                    'end_date': member.latest_membership.end_date,
+                    'days_remaining': member.days_remaining,
+                }
+            else:
+                # Member kedaluwarsa atau belum berpaket -> catat peringatan (D-008)
+                checkin = Checkin.objects.create(
+                    member=member,
+                    method=Checkin.Method.CODE,
+                    result=Checkin.Result.EXPIRED_WARNING,
+                    recorded_by=request.user
+                )
+                last_result = {
+                    'status': 'expired_warning',
+                    'member': member,
+                    'checkin': checkin,
+                    'title': 'PERINGATAN: MASA AKTIF KEDALUWARSA!',
+                    'message': f"Keanggotaan {member.full_name} sudah habis atau belum memiliki paket aktif. Silakan tagih perpanjangan.",
+                    'end_date': member.latest_membership.end_date if member.latest_membership else None,
+                }
 
             # Kosongkan form agar kursor langsung siap untuk input berikutnya
             form = CheckinForm()
@@ -82,5 +99,6 @@ def checkin_page(request):
         'total_today': today_checkins.count(),
         'allowed_today': today_checkins.filter(result=Checkin.Result.ALLOWED).count(),
         'warning_today': today_checkins.filter(result=Checkin.Result.EXPIRED_WARNING).count(),
+        'blocked_today': today_checkins.filter(result=Checkin.Result.BLOCKED).count(),
     }
     return render(request, 'checkins/checkin.html', context)

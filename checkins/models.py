@@ -12,6 +12,7 @@ class Checkin(models.Model):
     class Result(models.TextChoices):
         ALLOWED = 'allowed', 'Diizinkan (Aktif)'
         EXPIRED_WARNING = 'expired_warning', 'Peringatan Kedaluwarsa'
+        BLOCKED = 'blocked', 'Ditolak (Akun Nonaktif)'
 
     member = models.ForeignKey(
         'members.Member',
@@ -57,3 +58,7 @@ class Checkin(models.Model):
     @property
     def is_warning(self) -> bool:
         return self.result == self.Result.EXPIRED_WARNING
+
+    @property
+    def is_blocked(self) -> bool:
+        return self.result == self.Result.BLOCKED

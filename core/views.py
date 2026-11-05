@@ -19,21 +19,26 @@ def dashboard(request):
     """
     Dashboard Operasional Utama (Pusat Kendali Resepsionis & Pemilik Gym).
     Menghitung metrik real-time: member aktif, akan habis, kehadiran hari ini, dan omzet (owner).
+    Hanya memperhitungkan member yang akunnya berstatus aktif (is_active=True).
     """
     today = timezone.localdate()
 
     # 1. Metrik Member
     total_members = Member.objects.count()
     active_member_ids = set(
-        Membership.objects.filter(end_date__gte=today).values_list('member_id', flat=True).distinct()
+        Membership.objects.filter(
+            end_date__gte=today,
+            member__is_active=True
+        ).values_list('member_id', flat=True).distinct()
     )
     active_count = len(active_member_ids)
     expired_count = total_members - active_count
 
-    # 2. Member yang Akan Habis dalam 7 Hari ke Depan (Expiring Soon)
+    # 2. Member yang Akan Habis dalam 7 Hari ke Depan (Expiring Soon - Hanya Akun Aktif)
     expiring_soon_memberships = Membership.objects.filter(
         end_date__gte=today,
-        end_date__lte=today + timedelta(days=7)
+        end_date__lte=today + timedelta(days=7),
+        member__is_active=True
     ).select_related('member', 'package').order_by('end_date')
 
     expiring_soon_list = []
@@ -110,13 +115,15 @@ def wa_reminders(request):
     Modul Pengingat Perpanjangan WhatsApp Semi-Manual (D-012, D-018).
     Menampilkan daftar member yang akan habis (H-7) dan member yang baru saja kedaluwarsa,
     dilengkapi tombol 1-klik untuk membuka WhatsApp dengan pesan siap kirim.
+    Hanya menargetkan member dengan akun aktif (is_active=True).
     """
     today = timezone.localdate()
 
-    # 1. Member Akan Habis (0 s/d 7 hari ke depan)
+    # 1. Member Akan Habis (0 s/d 7 hari ke depan) - Hanya Akun Aktif
     expiring_memberships = Membership.objects.filter(
         end_date__gte=today,
-        end_date__lte=today + timedelta(days=7)
+        end_date__lte=today + timedelta(days=7),
+        member__is_active=True
     ).select_related('member', 'package').order_by('end_date')
 
     expiring_list = []
@@ -142,10 +149,11 @@ def wa_reminders(request):
                     'wa_url': wa_url,
                 })
 
-    # 2. Member Sudah Kedaluwarsa (1 s/d 30 hari yang lalu)
+    # 2. Member Sudah Kedaluwarsa (1 s/d 30 hari yang lalu) - Hanya Akun Aktif
     expired_memberships = Membership.objects.filter(
         end_date__lt=today,
-        end_date__gte=today - timedelta(days=30)
+        end_date__gte=today - timedelta(days=30),
+        member__is_active=True
     ).select_related('member', 'package').order_by('-end_date')
 
     expired_list = []
@@ -171,27 +179,28 @@ def wa_reminders(request):
 
     context = {
         'title': 'Pengingat Perpanjangan WhatsApp',
+        'today': today,
         'expiring_list': expiring_list,
         'expired_list': expired_list,
-        'total_reminder': len(expiring_list) + len(expired_list),
+        'total_expiring': len(expiring_list),
+        'total_expired': len(expired_list),
     }
     return render(request, 'core/reminders.html', context)
 
 
 @login_required
-@owner_required
 @feature_required('FEATURE_REPORTS')
+@owner_required
 def reports_view(request):
     """
-    Laporan Keuangan & Pemasukan Khusus Pemilik (D-012).
-    Menampilkan rincian pendapatan harian, bulanan, metode pembayaran, dan paket terlaris.
+    Modul Laporan Keuangan & Rekap Kasir Khusus Owner (D-009, D-012).
+    Menampilkan omzet terfilter rentang tanggal, rincian per metode bayar, dan per paket.
     """
     today = timezone.localdate()
-
-    # Filter rentang tanggal (default: tanggal 1 bulan ini s/d hari ini)
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
 
+    # Default rentang: awal bulan ini s/d hari ini
     if start_date_str:
         try:
             start_date = timezone.datetime.strptime(start_date_str, '%Y-%m-%d').date()

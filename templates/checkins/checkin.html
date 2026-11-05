@@ -49,6 +49,27 @@
                         </div>
                     </div>
                 </div>
+            {% elif last_result.status == 'blocked' %}
+                <!-- AKSES DITOLAK: Member Nonaktif / Diblokir -->
+                <div class="card card-gym bg-dark text-white p-4 shadow mb-4 border border-danger border-2" style="animation: fadeIn 0.3s ease-in-out;">
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="bi bi-slash-circle-fill display-4 text-danger"></i>
+                        <div class="flex-grow-1">
+                            <span class="badge bg-danger text-white fw-bold px-2 py-1 mb-1">{{ last_result.title }}</span>
+                            <h2 class="fw-bold mb-1 text-danger-subtle">{{ last_result.member.full_name }}</h2>
+                            <div class="small text-white-50 font-monospace">Kode: {{ last_result.member.member_code }}</div>
+                            <p class="mt-2 mb-3 text-warning-emphasis small">{{ last_result.message }}</p>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'member_detail' last_result.member.pk %}" class="btn btn-outline-light btn-sm">
+                                    <i class="bi bi-person-lines-fill me-1"></i> Buka Profil Member
+                                </a>
+                                <a href="{% url 'member_update' last_result.member.pk %}" class="btn btn-warning btn-sm text-dark fw-bold">
+                                    <i class="bi bi-toggle-on me-1"></i> Aktifkan Kembali Akun
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             {% elif last_result.status == 'expired_warning' %}
                 <!-- PERINGATAN: Member Kedaluwarsa (D-008) -->
                 <div class="card card-gym bg-danger text-white p-4 shadow mb-4" style="animation: fadeIn 0.3s ease-in-out;">
@@ -88,19 +109,19 @@
         <div class="row g-2 mb-3">
             <div class="col-4">
                 <div class="card card-gym p-3 bg-white text-center">
-                    <span class="text-secondary small fw-semibold">Check-in Hari Ini</span>
+                    <span class="text-secondary small fw-semibold">Check-in</span>
                     <h3 class="fw-bold mb-0 text-dark">{{ total_today }}</h3>
                 </div>
             </div>
             <div class="col-4">
                 <div class="card card-gym p-3 bg-white text-center">
-                    <span class="text-secondary small fw-semibold">Member Aktif</span>
+                    <span class="text-secondary small fw-semibold">Aktif</span>
                     <h3 class="fw-bold mb-0 text-success">{{ allowed_today }}</h3>
                 </div>
             </div>
             <div class="col-4">
                 <div class="card card-gym p-3 bg-white text-center">
-                    <span class="text-secondary small fw-semibold">Peringatan</span>
+                    <span class="text-secondary small fw-semibold">Kedaluwarsa</span>
                     <h3 class="fw-bold mb-0 text-danger">{{ warning_today }}</h3>
                 </div>
             </div>
@@ -135,9 +156,13 @@
                                 </span>
                             </td>
                             <td>
-                                {% if c.is_allowed %}
+                                {% if c.result == 'allowed' %}
                                     <span class="badge bg-success-subtle text-success border border-success-subtle">
                                         <i class="bi bi-check-circle-fill me-1"></i> Aktif
+                                    </span>
+                                {% elif c.result == 'blocked' %}
+                                    <span class="badge bg-dark text-white border border-secondary">
+                                        <i class="bi bi-slash-circle me-1"></i> Diblokir
                                     </span>
                                 {% else %}
                                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
@@ -146,7 +171,11 @@
                                 {% endif %}
                             </td>
                             <td class="text-end pe-3">
-                                {% if not c.is_allowed %}
+                                {% if c.result == 'blocked' %}
+                                    <a href="{% url 'member_update' c.member.pk %}" class="btn btn-sm btn-outline-warning py-0 px-2" title="Kelola Akun">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                {% elif not c.is_allowed %}
                                     <a href="{% url 'membership_create' c.member.pk %}" class="btn btn-sm btn-outline-danger py-0 px-2" title="Perpanjang">
                                         <i class="bi bi-credit-card"></i>
                                     </a>
@@ -172,4 +201,3 @@
     </div>
 </div>
 {% endblock %}
-

@@ -23,6 +23,8 @@ Aturan: keputusan berstatus **FINAL** tidak boleh diubah agent tanpa persetujuan
 | D-016 | **Status Pembayaran Kasir:** Pembayaran tunai/transfer di kasir otomatis berstatus `verified` dengan `verified_by = staf yang login`, namun tetap tercatat di log audit owner | Mencegah antrean transaksi terhenti saat menunggu verifikasi manual owner |
 | D-017 | **Input check-in autofocus & keyboard-scanner friendly:** Form check-in mendukung tombol `Enter` instan | Kompatibel langsung dengan barcode/QR scanner USB fisik tanpa perlu kode kamera |
 | D-018 | **Sanitasi otomatis nomor WhatsApp:** Sistem otomatis menormalisasi format nomor HP menjadi format standar `628xxx` saat disimpan | Mencegah error URL `wa.me` akibat salah format tanda `+`, spasi, atau awalan `08` |
+| D-019 | **Penanganan Akun Nonaktif / Diblokir:** Jika `is_active=False`, maka `is_membership_active` otomatis bernilai `False` dan status keanggotaan menjadi `inactive` ("Nonaktif / Diblokir"). Check-in ditolak tegas dengan status `BLOCKED` dan banner merah/hitam | Mencegah member bermasalah/diblokir lolos ke gym meskipun memiliki sisa hari paket |
+| D-020 | **Validasi Duplikasi & Fleksibilitas Keluarga:** `member_code` adalah kunci unik mutlak (case-insensitive). Pendaftaran nama baru yang sama persis dengan member nonaktif/diblokir ditolak keras; nama yang sama dengan member aktif diberi peringatan ganda (soft warning); nomor WhatsApp sama diizinkan dengan notifikasi info untuk mendukung pendaftaran keluarga (ayah/anak/suami/istri) | Menjaga integritas data tanpa mengorbankan fleksibilitas operasional nyata kasir |
 
 ## Keputusan terbuka (isi sebelum fase yang bergantung padanya dimulai)
 *(Semua keputusan utama awal telah ditetapkan dan disetujui)*
@@ -32,3 +34,4 @@ Aturan: keputusan berstatus **FINAL** tidak boleh diubah agent tanpa persetujuan
 |---|---|---|---|
 | 2026-11-04 | D-004, D-005, D-006, D-011 sampai D-014 | Ditetapkan: Django + SQLite, satu deployment per gym, feature flag, alur git, check-in via kode | Pemilik project |
 | 2026-11-04 | D-007 sampai D-010, D-015 sampai D-018 | Penetapan zona waktu WITA (Bitung), perilaku check-in warning, strategi backup 1-klik, custom user model, verifikasi instan kasir, scanner autofocus, sanitasi WA | Pemilik project |
+| 2026-11-05 | D-019, D-020 | Penegakan pemblokiran total check-in untuk akun nonaktif, validasi cerdas duplikasi nama/kode/HP ramah pendaftaran keluarga | Pemilik project |

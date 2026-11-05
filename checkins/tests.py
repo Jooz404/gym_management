@@ -64,6 +64,21 @@ class CheckinViewsAndLogicTest(TestCase):
             phone_wa='081234567803'
         )
 
+        # 4. Member Dinonaktifkan / Diblokir (walau punya paket aktif)
+        self.blocked_member = Member.objects.create(
+            member_code='FLX-BLOKIR1',
+            full_name='Member Diblokir Anton',
+            phone_wa='081234567804',
+            is_active=False
+        )
+        Membership.objects.create(
+            member=self.blocked_member,
+            package=self.pkg,
+            start_date=today - timedelta(days=2),
+            end_date=today + timedelta(days=28),
+            created_by=self.staff
+        )
+
     def test_checkin_page_get(self):
         resp = self.client.get(reverse('checkin_page'))
         self.assertEqual(resp.status_code, 200)
@@ -109,6 +124,22 @@ class CheckinViewsAndLogicTest(TestCase):
         checkin = Checkin.objects.filter(member=self.nopkg_member).first()
         self.assertIsNotNone(checkin)
         self.assertEqual(checkin.result, Checkin.Result.EXPIRED_WARNING)
+
+    def test_checkin_inactive_member_blocked(self):
+        # Member nonaktif/diblokir harus DITOLAK walau masa berlaku paket masih panjang
+        resp = self.client.post(reverse('checkin_page'), {
+            'member_code': 'FLX-BLOKIR1',
+        })
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'AKSES DITOLAK: AKUN NONAKTIF / DIBLOKIR')
+        self.assertContains(resp, 'Member Diblokir Anton')
+
+        # Cek database
+        checkin = Checkin.objects.filter(member=self.blocked_member).first()
+        self.assertIsNotNone(checkin)
+        self.assertEqual(checkin.result, Checkin.Result.BLOCKED)
+        self.assertTrue(checkin.is_blocked)
+        self.assertFalse(checkin.is_allowed)
 
     def test_checkin_unknown_code(self):
         resp = self.client.post(reverse('checkin_page'), {

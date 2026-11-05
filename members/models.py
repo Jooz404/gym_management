@@ -88,7 +88,12 @@ class Member(models.Model):
 
     @property
     def is_membership_active(self) -> bool:
-        """Status aktif dihitung dinamis dari end_date (D-003)."""
+        """
+        Status aktif dihitung dinamis dari end_date (D-003) DAN status akun (is_active).
+        Jika akun nonaktif / diblokir, otomatis tidak aktif.
+        """
+        if not self.is_active:
+            return False
         latest = self.latest_membership
         if not latest:
             return False
@@ -105,6 +110,8 @@ class Member(models.Model):
     @property
     def membership_status(self) -> str:
         """Status string terhitung untuk logic badge UI."""
+        if not self.is_active:
+            return 'inactive'
         latest = self.latest_membership
         if not latest:
             return 'no_membership'
@@ -119,6 +126,7 @@ class Member(models.Model):
     @property
     def membership_status_display(self) -> str:
         status_map = {
+            'inactive': 'Nonaktif / Diblokir',
             'no_membership': 'Belum Ada Paket',
             'expired': 'Kedaluwarsa',
             'expiring_soon': 'Akan Habis',

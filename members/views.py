@@ -49,6 +49,27 @@ def member_create(request):
         if form.is_valid():
             member = form.save()
             messages.success(request, f"Member '{member.full_name}' dengan kode {member.member_code} berhasil didaftarkan!")
+
+            # Peringatan lembut jika ada member aktif lain dengan nama serupa
+            name_duplicates = Member.objects.filter(full_name__iexact=member.full_name).exclude(pk=member.pk)
+            if name_duplicates.exists():
+                other = name_duplicates.first()
+                messages.warning(
+                    request,
+                    f"Perhatian: Ditemukan member lain dengan nama serupa: '{other.full_name}' ({other.member_code}). "
+                    f"Pastikan ini bukan pendaftaran ganda untuk orang yang sama."
+                )
+
+            # Peringatan lembut jika nomor WhatsApp digunakan bersama
+            if member.phone_wa:
+                phone_duplicates = Member.objects.filter(phone_wa=member.phone_wa).exclude(pk=member.pk)
+                if phone_duplicates.exists():
+                    other_phone = phone_duplicates.first()
+                    messages.info(
+                        request,
+                        f"Catatan: Nomor WhatsApp {member.phone_wa} juga digunakan oleh member '{other_phone.full_name}' ({other_phone.member_code})."
+                    )
+
             return redirect('member_detail', pk=member.pk)
     else:
         form = MemberForm()
@@ -64,11 +85,35 @@ def member_create(request):
 def member_update(request, pk):
     """Mengubah data profil member."""
     member = get_object_or_404(Member, pk=pk)
+    was_active = member.is_active
     if request.method == 'POST':
         form = MemberForm(request.POST, instance=member)
         if form.is_valid():
             member = form.save()
-            messages.success(request, f"Perubahan profil member '{member.full_name}' berhasil disimpan!")
+            if was_active and not member.is_active:
+                messages.warning(
+                    request,
+                    f"Perhatian: Akun member '{member.full_name}' telah DINONAKTIFKAN / DIBLOKIR. "
+                    f"Member ini tidak akan diizinkan check-in ke gym."
+                )
+            elif not was_active and member.is_active:
+                messages.success(
+                    request,
+                    f"Akun member '{member.full_name}' telah DIAKTIFKAN kembali! Member kini dapat check-in."
+                )
+            else:
+                messages.success(request, f"Perubahan profil member '{member.full_name}' berhasil disimpan!")
+
+            # Cek duplikasi nomor HP jika ada
+            if member.phone_wa:
+                phone_duplicates = Member.objects.filter(phone_wa=member.phone_wa).exclude(pk=member.pk)
+                if phone_duplicates.exists():
+                    other_phone = phone_duplicates.first()
+                    messages.info(
+                        request,
+                        f"Catatan: Nomor WhatsApp {member.phone_wa} juga digunakan oleh member '{other_phone.full_name}' ({other_phone.member_code})."
+                    )
+
             return redirect('member_detail', pk=member.pk)
     else:
         form = MemberForm(instance=member)

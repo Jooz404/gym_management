@@ -1,5 +1,7 @@
+from datetime import timedelta
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.utils import timezone
 from django.core.files.uploadedfile import SimpleUploadedFile
 from accounts.models import User
 from packages.models import Package
@@ -89,6 +91,74 @@ class MemberModelAndViewsTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, target.full_name)
         self.assertContains(resp, target.member_code)
+
+    def test_inactive_member_status_and_properties(self):
+        # Member dengan status is_active=False walau tanggal paket masih ada
+        today = timezone.localdate()
+        m = Member.objects.create(
+            full_name="Member Dinonaktifkan",
+            is_active=False
+        )
+        Membership.objects.create(
+            member=m,
+            package=self.pkg,
+            start_date=today,
+            end_date=today + timedelta(days=20),
+            created_by=self.staff
+        )
+        self.assertFalse(m.is_membership_active)
+        self.assertEqual(m.membership_status, 'inactive')
+        self.assertEqual(m.membership_status_display, 'Nonaktif / Diblokir')
+
+    def test_member_form_duplicate_code_rejected(self):
+        # Memasukkan kode yang sudah dipakai harus ditolak
+        resp = self.client.post(reverse('member_create'), {
+            'full_name': 'Member Kode Sama',
+            'member_code': 'flx-1001', # lowercase dari FLX-1001 yang sudah ada
+            'join_date': '2026-11-04',
+            'is_active': True,
+        })
+        self.assertEqual(resp.status_code, 200)
+        self.assertFormError(resp.context['form'], 'member_code', "Kode member 'FLX-1001' sudah digunakan oleh 'Member Testing 1'. Gunakan kode lain atau kosongkan kolom ini agar sistem membuat kode baru otomatis.")
+
+    def test_member_form_same_name_as_blocked_member_rejected(self):
+        # Menonaktifkan member nomor 1
+        m1 = self.members[0]
+        m1.is_active = False
+        m1.save()
+
+        # Mencoba membuat member baru dengan nama yang sama persis
+        resp = self.client.post(reverse('member_create'), {
+            'full_name': 'Member Testing 1',
+            'phone_wa': '089988776655',
+            'join_date': '2026-11-04',
+            'is_active': True,
+        })
+        self.assertEqual(resp.status_code, 200)
+        self.assertFormError(resp.context['form'], 'full_name', f"Member dengan nama '{m1.full_name}' sudah terdaftar dan saat ini berstatus NONAKTIF / DIBLOKIR ({m1.member_code}). Dilarang membuat akun baru. Silakan buka data member lama dan aktifkan kembali akunnya jika diizinkan.")
+
+    def test_member_form_same_name_as_active_member_allowed_with_warning(self):
+        # Mencoba membuat member baru dengan nama sama persis dengan member aktif
+        resp = self.client.post(reverse('member_create'), {
+            'full_name': 'Member Testing 2',
+            'phone_wa': '089988776655',
+            'join_date': '2026-11-04',
+            'is_active': True,
+        }, follow=True)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Ditemukan member lain dengan nama serupa")
+
+    def test_member_form_shared_phone_allowed_with_info(self):
+        # Nomor HP sama (misal keluarga) tetap diizinkan namun diberi catatan info
+        resp = self.client.post(reverse('member_create'), {
+            'full_name': 'Keluarga Member 3',
+            'phone_wa': '081200000003', # nomor yang sama dengan Member Testing 3
+            'join_date': '2026-11-04',
+            'is_active': True,
+        }, follow=True)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "juga digunakan oleh member")
+        self.assertContains(resp, "Member Testing 3")
 
     def test_download_import_template(self):
         resp = self.client.get(reverse('download_import_template'))

@@ -84,16 +84,19 @@
             </thead>
             <tbody>
                 {% for member in members %}
-                <tr>
+                <tr {% if not member.is_active %}class="table-light text-muted"{% endif %}>
                     <td class="ps-4">
-                        <span class="badge bg-dark-subtle text-dark border font-monospace px-2 py-1 fs-6">
+                        <span class="badge {% if member.is_active %}bg-dark-subtle text-dark border{% else %}bg-secondary text-white{% endif %} font-monospace px-2 py-1 fs-6">
                             {{ member.member_code }}
                         </span>
                     </td>
                     <td>
-                        <a href="{% url 'member_detail' member.pk %}" class="fw-bold text-decoration-none text-dark">
+                        <a href="{% url 'member_detail' member.pk %}" class="fw-bold text-decoration-none {% if member.is_active %}text-dark{% else %}text-muted text-decoration-line-through{% endif %}">
                             {{ member.full_name }}
                         </a>
+                        {% if not member.is_active %}
+                        <span class="badge bg-dark text-white ms-1" style="font-size: 0.65rem;">NONAKTIF</span>
+                        {% endif %}
                         {% if member.notes %}
                         <div class="small text-muted text-truncate" style="max-width: 200px;">
                             <i class="bi bi-info-circle me-1"></i>{{ member.notes }}
@@ -111,7 +114,11 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if member.membership_status == 'active' %}
+                        {% if member.membership_status == 'inactive' %}
+                            <span class="badge bg-dark text-white border border-secondary">
+                                <i class="bi bi-slash-circle me-1"></i> Nonaktif / Diblokir
+                            </span>
+                        {% elif member.membership_status == 'active' %}
                             <span class="badge bg-success-subtle text-success border border-success-subtle">
                                 <i class="bi bi-check-circle-fill me-1"></i> Aktif ({{ member.days_remaining }} hr)
                             </span>
@@ -142,9 +149,11 @@
                     </td>
                     <td class="text-end pe-4">
                         <div class="btn-group btn-group-sm">
+                            {% if member.is_active %}
                             <a href="{% url 'membership_create' member.pk %}" class="btn btn-outline-success" title="Perpanjang / Beli Paket">
                                 <i class="bi bi-credit-card"></i> Paket
                             </a>
+                            {% endif %}
                             <a href="{% url 'member_detail' member.pk %}" class="btn btn-outline-primary" title="Lihat Profil">
                                 <i class="bi bi-eye"></i>
                             </a>
